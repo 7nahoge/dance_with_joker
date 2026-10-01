@@ -255,7 +255,7 @@
       game.score += kind === "perfect" ? 100 : 60;
       game.combo++;
       game.maxCombo = Math.max(game.maxCombo, game.combo);
-      if (game.combo === 10) dialogue("へえ。なかなかやるじゃない。");
+      if (game.combo === 10) dialogue("へえ。やるじゃんすけ。");
       const spark = document.createElement("div");
       spark.className = "spark " + kind;
       spark.dataset.expires = now + 0.5;
@@ -364,7 +364,7 @@
     $("pause-dialog").close();
     screen("title");
     showPortrait(false);
-    dialogue("私と踊ってみる？");
+    dialogue("わたしと踊ってみる？");
     $("error").hidden = true;
   }
   $("start").addEventListener("click", start);
