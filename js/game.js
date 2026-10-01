@@ -3,7 +3,7 @@
   const $ = id => document.getElementById(id);
   const scoreData = window.WALTZ_SCORE;
   if (!scoreData) { $("error").hidden = false; $("error").textContent = "譜面を読み込めませんでした。ページを再読み込みしてください。"; $("start").disabled = true; return; }
-  const PLAYBACK_RATE = 1;
+  const PLAYBACK_RATE = 160 / scoreData.bpm;
   const BEAT = scoreData.beat / PLAYBACK_RATE, COUNT_IN = 6 * BEAT, APPROACH = 2;
   let DURATION = scoreData.duration / PLAYBACK_RATE;
   const MUSIC_URL = "assets/joker_music.wav?v=waltz24-file-as-is240";

@@ -26,7 +26,7 @@ async function verify(root = require('node:path').resolve(__dirname, '..')) {
   const window = new Element(); window.AudioContext = Audio; window.location = { protocol: 'http:' };
   const context = vm.createContext({ document, window, fetch: async url => { assert.equal(url,'assets/joker_music.wav?v=waltz24-file-as-is240'); fetchCount++; return {ok:!failFetch,arrayBuffer:async()=>new ArrayBuffer(8)}; }, requestAnimationFrame: fn => { raf = fn; return 1; }, cancelAnimationFrame: () => { raf = null; } });
   vm.runInContext(fs.readFileSync(root + '/js/music-chart.js', 'utf8'), context);
-  const scoreData = window.WALTZ_SCORE, chart = scoreData.notes, lead = .12 + 6 * (scoreData.beat / 1);
+  const scoreData = window.WALTZ_SCORE, chart = scoreData.notes, playbackRate = 160 / scoreData.bpm, lead = .12 + 6 * (scoreData.beat / playbackRate);
   const wav = fs.readFileSync(root + '/assets/joker_music.wav');
   assert.equal(wav.readUInt32LE(40) / wav.readUInt32LE(28), scoreData.duration);
   assert.equal(scoreData.duration,68.1);
@@ -102,12 +102,12 @@ async function verify(root = require('node:path').resolve(__dirname, '..')) {
     assert(localTime < scoreData.cycle, 'Keep notes inside the complete waltz bars');
     assert.equal(Math.round(scoreData.cycle / scoreData.beat), 24, 'Loop must preserve the 3/4 beat grid');
     const previousSameLane = chart.slice(0,i).reverse().find(other=>other.lane===n.lane);
-    if(previousSameLane) assert((n.time-previousSameLane.time)/1>.32,'Same-lane windows must not overlap');
+    if(previousSameLane) assert((n.time-previousSameLane.time)/playbackRate>.32,'Same-lane windows must not overlap');
   }
   assert(chart.some((n,i)=>i>0 && n.lane===chart[i-1].lane),'Include same-lane doubles');
   assert(chart.some((n,i)=>i>0 && n.time-chart[i-1].time<.3),'Include melody subdivisions');
   assert(chart.some(n=>!scoreData.sourceBeats.some(t=>Math.abs(n.time-(Math.floor(n.time/scoreData.cycle)*scoreData.cycle+t))<.08)),'Chart must not be a beat-only grid');
-  const playDuration = scoreData.duration / 1;
+  const playDuration = scoreData.duration / playbackRate;
 
   vm.runInContext(fs.readFileSync(root + '/js/game.js', 'utf8'), context);
   const tick = t => { if(audio.state === 'running') audio.currentTime = t; const fn = raf; raf = null; if(fn) fn(); };
@@ -116,10 +116,10 @@ async function verify(root = require('node:path').resolve(__dirname, '..')) {
   window.location.protocol = 'http:'; failFetch=true; await get('start').fire('click'); assert.equal(get('error').hidden,false); assert.equal(active.size,0);
   failFetch=false; failDecode=true; await get('start').fire('click'); assert.equal(get('error').hidden,false); assert.equal(active.size,0);
   failDecode=false; await get('start').fire('click'); const voices = active.size; assert.equal(voices,7); assert.equal(get('play').hidden, false); assert.equal(get('error').hidden,true);
-  assert.equal(sources[0].playbackRate.value,1); assert.equal(sources[0].loop,false); assert.equal(sources[0].startedAt,lead); assert.equal(sources[0].offset,0); assert.equal(sources[0].stoppedAt,lead+playDuration);
-  tick(lead+chart[0].time/1); await press(0); assert.equal(get('score').textContent, '0100'); await press(0); await press(1); assert.equal(get('score').textContent, '0100');
-  tick(lead+chart[1].time/1+.1); await press(1, true); assert.equal(get('score').textContent, '0100'); await press(1); assert.equal(get('score').textContent, '0160');
-  tick(lead+chart[2].time/1+.17); assert.equal(get('combo').textContent, 0);
+  assert.equal(sources[0].playbackRate.value,playbackRate); assert.equal(sources[0].loop,false); assert.equal(sources[0].startedAt,lead); assert.equal(sources[0].offset,0); assert.equal(sources[0].stoppedAt,lead+playDuration);
+  tick(lead+chart[0].time/playbackRate); await press(0); assert.equal(get('score').textContent, '0100'); await press(0); await press(1); assert.equal(get('score').textContent, '0100');
+  tick(lead+chart[1].time/playbackRate+.1); await press(1, true); assert.equal(get('score').textContent, '0100'); await press(1); assert.equal(get('score').textContent, '0160');
+  tick(lead+chart[2].time/playbackRate+.17); assert.equal(get('combo').textContent, 0);
   await get('pause').fire('click'); const stoppedAt = audio.currentTime; tick(25); assert.equal(audio.currentTime, stoppedAt); await press(1); assert.equal(get('score').textContent, '0160');
   await get('resume').fire('click'); assert.equal(audio.currentTime, stoppedAt); assert.equal(active.size, voices); assert.equal(sources.length,1);
   tick(lead+playDuration-1); assert.equal(get('play').hidden,false); assert.equal(get('result').hidden,true);
@@ -130,16 +130,16 @@ async function verify(root = require('node:path').resolve(__dirname, '..')) {
   await get('quit').fire('click'); assert.equal(active.size, 0);
   await get('joker').fire('error'); await get('movie').fire('error'); assert.equal(get('placeholder').hidden, false);
   await get('start').fire('click'); const start = audio.currentTime + lead;
-  for(const n of chart) { tick(start+n.time/1); await pads[n.lane].fire('pointerdown', {button:0,pointerId:1}); await pads[n.lane].fire('click',{detail:1}); await press(n.lane, true); }
+  for(const n of chart) { tick(start+n.time/playbackRate); await pads[n.lane].fire('pointerdown', {button:0,pointerId:1}); await pads[n.lane].fire('click',{detail:1}); await press(n.lane, true); }
   tick(start+playDuration+.01); assert.equal(get('result-score').textContent, chart.length*100); assert.equal(get('result-combo').textContent, chart.length); assert.equal(get('result-perfect').textContent, chart.length); assert.equal(get('result-miss').textContent, 0);
   // Inclusive timing boundaries and just-outside input rejection.
   await get('retry').fire('click'); const boundaryStart = audio.currentTime + lead;
-  tick(boundaryStart+chart[0].time/1-.161); await press(0); assert.equal(get('score').textContent,'0000');
-  tick(boundaryStart+chart[0].time/1-.160); await press(0); assert.equal(get('score').textContent,'0060');
-  tick(boundaryStart+chart[1].time/1+.080); await press(1); assert.equal(get('score').textContent,'0160');
-  tick(boundaryStart+chart[2].time/1+.160); await press(0); assert.equal(get('score').textContent,'0220');
+  tick(boundaryStart+chart[0].time/playbackRate-.161); await press(0); assert.equal(get('score').textContent,'0000');
+  tick(boundaryStart+chart[0].time/playbackRate-.160); await press(0); assert.equal(get('score').textContent,'0060');
+  tick(boundaryStart+chart[1].time/playbackRate+.080); await press(1); assert.equal(get('score').textContent,'0160');
+  tick(boundaryStart+chart[2].time/playbackRate+.160); await press(0); assert.equal(get('score').textContent,'0220');
   await get('pause').fire('click'); await get('quit').fire('click'); assert.equal(active.size,0); assert.equal(raf,null);
-  return `PASS: ${chart.length} beat/offbeat notes, ${scoreData.bpm*1} BPM, no overlap; WAV loading/cache/scheduling; failure recovery; pause/resume; retry; full run; judgement boundaries; duplicate input; held key; hidden tab; cleanup; missing images/video; ${chart.length*100}-point perfect run.`;
+  return `PASS: ${chart.length} beat/offbeat notes, ${scoreData.bpm*playbackRate} BPM, no overlap; WAV loading/cache/scheduling; failure recovery; pause/resume; retry; full run; judgement boundaries; duplicate input; held key; hidden tab; cleanup; missing images/video; ${chart.length*100}-point perfect run.`;
 }
 module.exports = verify;
 if (require.main === module) verify().then(console.log).catch(e => { console.error(e); process.exitCode = 1; });
