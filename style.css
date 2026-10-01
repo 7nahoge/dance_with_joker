@@ -765,33 +765,44 @@ dialog .eyebrow {
   }
 }
 
-/* Keep the result actions within the mobile viewport. */
+/* Give the mobile result portrait room; short screens can scroll to the actions. */
 @media (max-width: 700px) {
   body.in-result main {
     gap: 8px;
   }
   body.in-result .character {
-    height: clamp(90px, 20svh, 160px);
+    height: clamp(260px, 40svh, 360px);
     min-height: 0;
+  }
+  body.in-result .portrait {
+    inset: 0 0 52px;
+  }
+  body.in-result .speech {
+    min-height: 44px;
+    height: auto;
+    font-size: 14px;
+    line-height: 1.6;
   }
   body.in-result .result-panel {
     padding-top: 4px;
   }
   body.in-result .eyebrow {
+    font-size: 11px;
     margin-bottom: 8px;
   }
   body.in-result .ornament {
     margin-bottom: 8px;
   }
   body.in-result h2 {
-    font-size: 22px;
+    font-size: 28px;
     margin: 8px 0;
   }
   body.in-result .result-label {
+    font-size: 14px;
     margin: 8px 0;
   }
   body.in-result .result-score {
-    font-size: 40px;
+    font-size: 56px;
     margin: 4px 0 12px;
   }
   body.in-result .results {
