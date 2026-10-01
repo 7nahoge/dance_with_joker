@@ -3,13 +3,20 @@
   const $ = id => document.getElementById(id);
   const scoreData = window.WALTZ_SCORE;
   if (!scoreData) { $("error").hidden = false; $("error").textContent = "譜面を読み込めませんでした。ページを再読み込みしてください。"; $("start").disabled = true; return; }
-  const PLAYBACK_RATE = 1.05;
+  const PLAYBACK_RATE = 1;
   const BEAT = scoreData.beat / PLAYBACK_RATE, COUNT_IN = 6 * BEAT, APPROACH = 2;
   let DURATION = scoreData.duration / PLAYBACK_RATE;
-  const MUSIC_URL = "assets/joker_music.wav?v=nooverlap63";
+  const MUSIC_URL = "assets/joker_music.wav?v=waltz24-file-as-is240";
   let musicBuffer = null;
-  // Each hit time follows an onset in the BGM, including the shifted loop joins.
+  // Beat and offbeat timings follow complete 3/4 bars across each repeat.
   const chart = scoreData.notes.map(note => ({ ...note, time: note.time / PLAYBACK_RATE }));
+  // Keep consecutive cards in each lane separated, including on short screens.
+  const lastLaneTime = [-Infinity, -Infinity];
+  const MIN_LANE_INTERVAL = chart.reduce((minimum, note) => {
+    const interval = note.time - lastLaneTime[note.lane];
+    lastLaneTime[note.lane] = note.time;
+    return Math.min(minimum, interval);
+  }, Infinity);
   const game = { state: "title", context: null, master: null, voices: new Set(), notes: [], raf: 0, generation: 0, score: 0, combo: 0, maxCombo: 0, perfect: 0, good: 0, miss: 0, musicStart: 0, countStart: 0, endTime: 0, lastMiss: -Infinity, feedbackUntil: 0, busy: false, muted: false };
   let imageOK = true, videoOK = true;
   function dialogue(text) { $("dialogue").textContent = `「${text}」`; }
@@ -49,17 +56,13 @@
   }
   function scheduleMusic() {
     for (let i = 0; i < 6; i++) tone(i % 3 === 0 ? 76 : 69, game.countStart + i * BEAT, .16, .12);
-    const source = game.context.createBufferSource(), fade = game.context.createGain();
+    const source = game.context.createBufferSource();
     source.buffer = musicBuffer;
     source.playbackRate.value = PLAYBACK_RATE;
     // The complete track contains every repeat; play through its end once.
     source.loop = false;
-    fade.gain.setValueAtTime(0, game.musicStart);
-    fade.gain.linearRampToValueAtTime(1, game.musicStart + .03);
-    fade.gain.setValueAtTime(1, game.endTime - .15);
-    fade.gain.linearRampToValueAtTime(0, game.endTime);
-    source.connect(fade); fade.connect(game.master); game.voices.add(source);
-    source.onended = () => { source.disconnect(); fade.disconnect(); game.voices.delete(source); };
+    source.connect(game.master); game.voices.add(source);
+    source.onended = () => { source.disconnect(); game.voices.delete(source); };
     source.start(game.musicStart, 0); source.stop(game.endTime);
   }
   function clearRun() {
@@ -111,7 +114,9 @@
       if (now - note.at > .1600001) { judge(note, "miss", now); continue; }
       if (note.at - now <= APPROACH) {
         if (!note.element) { const el = document.createElement("div"); el.className = "card"; el.dataset.lane = note.lane; el.style.left = note.lane ? "75%" : "25%"; el.textContent = note.suit; $("cards").append(el); note.element = el; }
-        note.element.style.transform = `translateY(${line - (note.at - now) / APPROACH * (line + 40) - note.element.offsetHeight / 2}px)`;
+        const cardHeight = note.element.offsetHeight;
+        const approach = Math.min(APPROACH, (line + 40) * MIN_LANE_INTERVAL / (cardHeight + 10));
+        note.element.style.transform = `translateY(${line - (note.at - now) / approach * (line + 40) - cardHeight / 2}px)`;
       }
     }
     if (now > game.feedbackUntil) $("judgement").textContent = "";
