@@ -343,7 +343,7 @@
     clearRun();
     screen("result");
     showPortrait(false);
-    dialogue(game.passed ? "合格。次は、もう少し難しいステップを。" : "もう一度、同じステップで踊ってみる？");
+    dialogue(game.passed ? "合格、やるじゃんすけ。次は、もう少し難しいステップを。" : "もう一度、同じステップで踊ってみる？");
     $("result-status").textContent = `LEVEL ${game.level} · ${game.passed ? "合格！" : "再挑戦"} · 及第点 ${Math.ceil(game.notes.length * 60)}点`;
     $("retry").textContent = game.passed ? `レベル ${game.level + 1} へ進む →` : `レベル ${game.level} に再挑戦 ↻`;
     $("result-score").textContent = game.score;
