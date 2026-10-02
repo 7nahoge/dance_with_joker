@@ -17,15 +17,8 @@
   let DURATION = scoreData.duration / PLAYBACK_RATE;
   const MUSIC_URL = "assets/joker_music_s.wav?v=waltz24-file-as-is240";
   let musicBuffer = null;
-  // Beat and offbeat timings follow complete 3/4 bars across each repeat.
-  const chart = window.JokerDifficulty.chart(scoreData, MAX_LEVEL);
-  // Keep consecutive cards in each lane separated, including on short screens.
-  const lastLaneTime = [-Infinity, -Infinity];
-  let MIN_LANE_INTERVAL = chart.reduce((minimum, note) => {
-    const interval = note.time - lastLaneTime[note.lane];
-    lastLaneTime[note.lane] = note.time;
-    return Math.min(minimum, interval);
-  }, Infinity);
+  // Calculated from the current level when a run starts.
+  let MIN_LANE_INTERVAL = Infinity;
   const game = {
     state: "title",
     level: 1,
@@ -240,7 +233,7 @@
       if (game.passed) game.level = Math.min(MAX_LEVEL, game.level + 1);
       game.passed = false;
       const runChart = window.JokerDifficulty.chart(scoreData, game.level, DURATION);
-      lastLaneTime.fill(-Infinity);
+      const lastLaneTime = [-Infinity, -Infinity];
       MIN_LANE_INTERVAL = runChart.reduce((minimum, note) => {
         const interval = note.time - lastLaneTime[note.lane];
         lastLaneTime[note.lane] = note.time;
