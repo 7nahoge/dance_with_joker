@@ -15,6 +15,7 @@ async function verify(root = require("node:path").resolve(__dirname, "..")) {
       this.clientHeight = 400;
       this.offsetHeight = 72;
       this.tagName = "BUTTON";
+      this.playCount = 0;
       this.classList = { add() {}, remove() {}, toggle() {} };
     }
     addEventListener(k, fn) {
@@ -87,6 +88,7 @@ async function verify(root = require("node:path").resolve(__dirname, "..")) {
     createGain() {
       return { gain: param(), connect() {}, disconnect() {} };
     }
+    createBiquadFilter() { return {frequency: {}, gain: {}, Q: {}, connect() {}, disconnect() {}}; }
     createOscillator() {
       const o = {
         frequency: {},
@@ -298,8 +300,8 @@ async function verify(root = require("node:path").resolve(__dirname, "..")) {
   );
   const playDuration = scoreData.duration / playbackRate;
 
-  let beats = 0;
-  let runChart = chart.filter(n => n.kind === "beat" && beats++ % 3 !== 2);
+  vm.runInContext(fs.readFileSync(root + "/js/difficulty.js", "utf8"), context);
+  let runChart = window.JokerDifficulty.chart(scoreData, 1);
   vm.runInContext(fs.readFileSync(root + "/js/game.js", "utf8"), context);
   const tick = (t) => {
     if (audio.state === "running") audio.currentTime = t;
@@ -427,16 +429,16 @@ async function verify(root = require("node:path").resolve(__dirname, "..")) {
   await get("start").fire("click");
   // Inclusive timing boundaries and just-outside input rejection.
   const boundaryStart = audio.currentTime + lead;
-  tick(boundaryStart + runChart[0].time / playbackRate - 0.161);
+  tick(boundaryStart + runChart[0].time / playbackRate - 0.121);
   await press(0);
   assert.equal(get("score").textContent, "0000");
-  tick(boundaryStart + runChart[0].time / playbackRate - 0.16);
+  tick(boundaryStart + runChart[0].time / playbackRate - 0.12);
   await press(0);
   assert.equal(get("score").textContent, "0060");
-  tick(boundaryStart + runChart[1].time / playbackRate + 0.08);
+  tick(boundaryStart + runChart[1].time / playbackRate + 0.06);
   await press(1);
   assert.equal(get("score").textContent, "0160");
-  tick(boundaryStart + runChart[2].time / playbackRate + 0.16);
+  tick(boundaryStart + runChart[2].time / playbackRate + 0.12);
   await press(runChart[2].lane);
   assert.equal(get("score").textContent, "0220");
   await get("pause").fire("click");
@@ -448,10 +450,14 @@ async function verify(root = require("node:path").resolve(__dirname, "..")) {
   for (let level = 1; level <= 10; level++) {
     assert(get("level-info").textContent.includes(`LEVEL ${level} `));
     const levelStart = audio.currentTime + lead;
-    let beats = 0, offbeats = 0;
-    const levelChart = scoreData.notes.filter(n => n.time / playbackRate < playDuration - 0.17 &&
-      (n.kind === "beat" ? level > 1 || beats++ % 3 !== 2 :
-        level >= 4 || (level === 3 && offbeats++ % 2 === 0)));
+    const levelChart = window.JokerDifficulty.chart(scoreData, level);
+    assert.equal(levelChart.length, [210,252,294,336,336,336,336,336,336,336][level - 1]);
+    const laneTimes = [-Infinity, -Infinity];
+    for (const note of levelChart) {
+      assert(note.time - laneTimes[note.lane] > 2 * window.JokerDifficulty.judgementWindow(level), "Judgement windows must not overlap");
+      laneTimes[note.lane] = note.time;
+    }
+    assert(Math.abs(window.JokerDifficulty.judgementWindow(level) - (.12 - (level - 1) * .005)) < 1e-8);
     for (const n of levelChart) {
       tick(levelStart + n.time / playbackRate);
       await press(n.lane);

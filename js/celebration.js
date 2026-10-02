@@ -4,6 +4,7 @@
   const canvas = document.getElementById("fireworks");
   const ctx = canvas.getContext("2d");
   const rain = document.getElementById("circus-rain");
+  const confetti = document.getElementById("confetti-rain");
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   const colors = ["#c49b94", "#abb4a0", "#c8b684", "#a7a1b5", "#9bb4b7"];
   let audioSources = [], audioCache = null;
@@ -27,6 +28,10 @@
           if (voice === "strings") {
             tone = .45 * Math.sin(phase) + .28 * Math.sin(phase * 1.003)
               + .18 * Math.sin(phase * .997) + .16 * Math.sin(phase * 2) + .08 * Math.sin(phase * 3);
+          } else if (voice === "timpani") {
+            const drumPhase = phase + 1.8 * (1 - Math.exp(-t * 18));
+            tone = (Math.sin(drumPhase) + .32 * Math.sin(drumPhase * 1.48)
+              + .13 * Math.sin(drumPhase * 2.13)) * Math.exp(-t * 5);
           } else if (voice === "bell") {
             tone = (Math.sin(phase) + .35 * Math.sin(phase * 2) * Math.exp(-t * 5)
               + .15 * Math.sin(phase * 3) * Math.exp(-t * 8)) * Math.exp(-t * 3.5);
@@ -49,6 +54,9 @@
         note(melody[b] - 12, at, beat * 1.1, .075, -.35, "strings");
         if (b % 3 === 0) {
           note(chord[0], at, beat * 1.35, .18, 0);
+          note(chord[0] - 12, at, beat * 3.2, .19, -.1, "strings");
+          note(chord[0], at, beat * 2.7, .10, .25, "strings");
+          note(36, at, beat * 2.2, .20, 0, "timpani");
           chord.slice(1).forEach((m, i) =>
             note(m, at, beat * 3.3, .065, [-.65, .1, .65][i], "strings"));
           note(melody[b] + 12, at, beat * 2, .075, .55, "bell");
@@ -136,12 +144,23 @@
     for (const source of audioSources) { source.stop(); source.disconnect(); }
     audioSources = [];
     cancelAnimationFrame(raf); raf = 0; panel.hidden = true;
-    particles = []; rockets = []; rain.replaceChildren();
+    particles = []; rockets = []; rain.replaceChildren(); confetti.replaceChildren();
     window.removeEventListener("resize", resize);
   }
   function start(context, master) {
     stop(); panel.hidden = false; resize();
     celebrationAudio(context, master);
+    for (let i = 0; i < 90; i++) {
+      const piece = document.createElement("span");
+      piece.className = "confetti-piece";
+      piece.style.setProperty("--x", `${Math.random() * 100}%`);
+      piece.style.setProperty("--color", ["#efd18d", "#d7899c", "#aab9df", "#b4d8c0", "#fff0cf"][i % 5]);
+      piece.style.setProperty("--drift", `${Math.random() * 100 - 50}px`);
+      piece.style.setProperty("--duration", `${7 + Math.random() * 6}s`);
+      piece.style.setProperty("--delay", `${-Math.random() * 13}s`);
+      piece.style.setProperty("--turn", `${360 + Math.random() * 720}deg`);
+      confetti.append(piece);
+    }
     window.addEventListener("resize", resize);
     ctx.clearRect(0,0,width,height);
     for (let i = 0; i < 42; i++) {

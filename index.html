@@ -4,12 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
     <title>danSiNg with the joker ～ジョーカーと秘密のワルツ～</title>
-    <link rel="stylesheet" href="style.css?v=finale10-circus" />
+    <link rel="stylesheet" href="style.css?v=confetti-front" />
     <link rel="icon" href="./favicon.ico?v=1" type="image/x-icon" />
     <link rel="shortcut icon" href="./favicon.ico?v=1" type="image/x-icon" />
     <script src="js/music-chart.js?v=waltz24-rest226" defer></script>
-    <script src="js/celebration.js?v=finale-orchestra" defer></script>
-    <script src="js/game.js?v=movie-after-count6" defer></script>
+    <script src="js/difficulty.js?v=harder10" defer></script>
+    <script src="js/celebration.js?v=orchestra-bass-confetti" defer></script>
+    <script src="js/game.js?v=harder-bass" defer></script>
   </head>
   <body>
     <div class="theatre">
@@ -108,6 +109,7 @@
     <section id="celebration" class="celebration" hidden aria-label="全10レベルクリアのお祝い">
       <canvas id="fireworks" aria-hidden="true"></canvas>
       <div id="circus-rain" aria-hidden="true"></div>
+      <div id="confetti-rain" aria-hidden="true"></div>
       <div class="finale-content">
         <p class="eyebrow">THE GRAND FINALE · LEVEL 10</p>
         <h2>全レベルクリア、おめでとう！</h2>
@@ -120,7 +122,7 @@
       <p class="eyebrow">HOW TO DANCE</p>
       <h2>ルールは、いたって簡単。</h2>
       <p>
-        6拍のカウントのあと、約68.1秒のワルツを1回だけ再生します。ジョーカーの動画は6拍のカウントが終わった直後、音楽と同時に動き始めます。カードの中心が金色の線に重なったら入力。満点の60％以上で合格し、結果画面から次のレベルへ進めます。届かなければ同じレベルに再挑戦。レベル1は表拍の一部、レベル2はすべての表拍、レベル3は裏拍の半分、レベル4はすべての裏拍も加わり、レベル5以降は判定が少しずつ厳しくなります。レベル10が最終ステージです。クリアすると特別なお祝いが始まります。タイトルへ戻るとレベル1から始まります。
+        6拍のカウントのあと、約68.1秒のワルツを1回だけ再生します。ジョーカーの動画は6拍のカウントが終わった直後、音楽と同時に動き始めます。カードの中心が金色の線に重なったら入力。満点の60％以上で合格し、結果画面から次のレベルへ進めます。届かなければ同じレベルに再挑戦。カードはレベル1で210枚、レベル2で252枚、レベル3で294枚、レベル4以降で336枚。表拍と裏拍の連続ステップが増え、判定もレベルごとに厳しくなります。レベル10が最終ステージです。クリアすると特別なお祝いが始まります。タイトルへ戻るとレベル1から始まります。
       </p>
       <div class="help-keys">
         <b>F <small>左レーン</small></b
@@ -128,7 +130,7 @@
       </div>
       <p>スマートフォンは下の左右ボタンをタップ。マウスのクリックでも踊れます。</p>
       <p>
-        レベル1〜4：Perfect ±80ms / 100点<br />Good ±160ms / 60点<br />レベル5以降は各レベルでGoodの判定幅が5msずつ縮まり、Perfectはその半分です（レベル10：Perfect ±65ms / Good ±130ms）。<br />Missでコンボが途切れますが、最後まで踊れます。
+        レベル1：Perfect ±60ms / 100点<br />Good ±120ms / 60点<br />各レベルでGoodの判定幅が5msずつ縮まり、Perfectはその半分です（レベル10：Perfect ±37.5ms / Good ±75ms）。<br />Missでコンボが途切れますが、最後まで踊れます。
       </p>
       <p>一時停止ボタン・Escで中断。タブを離れると自動で停止します。</p>
       <button id="close-help" class="primary">タイトルへ戻る</button>

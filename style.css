@@ -9,6 +9,29 @@
 .celebration[hidden] { display: none; }
 #fireworks, #circus-rain { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 #circus-rain { overflow: hidden; }
+#confetti-rain {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  pointer-events: none;
+}
+.confetti-piece {
+  position: absolute;
+  top: -20px;
+  left: var(--x);
+  width: 6px;
+  height: 11px;
+  background: var(--color);
+  opacity: .8;
+  animation: confetti-fall var(--duration) var(--delay) linear infinite;
+}
+.confetti-piece:nth-child(3n) { width: 5px; height: 7px; border-radius: 50%; }
+@keyframes confetti-fall {
+  0% { transform: translate3d(0, -20px, 0) rotate(0deg) rotateY(0deg); }
+  50% { transform: translate3d(var(--drift), 50svh, 0) rotate(180deg) rotateY(240deg); }
+  100% { transform: translate3d(0, calc(100svh + 40px), 0) rotate(var(--turn)) rotateY(480deg); }
+}
 .finale-content {
   position: relative;
   z-index: 1;
@@ -35,6 +58,7 @@
   animation: finale-reveal 1.4s ease-out both;
 }
 .finale-content .primary { width: min(320px, 90vw); background: #33232eef; }
+.finale-content .primary, .finale-content h2, .finale-content p { position: relative; z-index: 3; }
 .circus-piece {
   position: absolute;
   left: var(--x);
@@ -80,6 +104,7 @@
 @media (prefers-reduced-motion: reduce) {
   .finale-card, .circus-piece { animation: none; }
   .circus-piece { top: 10%; opacity: .5; }
+  .confetti-piece { animation: none; top: 8%; opacity: .4; }
 }
 :root {
   color-scheme: dark;

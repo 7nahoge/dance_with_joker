@@ -18,7 +18,7 @@
   const MUSIC_URL = "assets/joker_music_s.wav?v=waltz24-file-as-is240";
   let musicBuffer = null;
   // Beat and offbeat timings follow complete 3/4 bars across each repeat.
-  const chart = scoreData.notes.map((note) => ({ ...note, time: note.time / PLAYBACK_RATE }));
+  const chart = window.JokerDifficulty.chart(scoreData, MAX_LEVEL);
   // Keep consecutive cards in each lane separated, including on short screens.
   const lastLaneTime = [-Infinity, -Infinity];
   let MIN_LANE_INTERVAL = chart.reduce((minimum, note) => {
@@ -159,10 +159,27 @@
     source.playbackRate.value = PLAYBACK_RATE;
     // The complete track contains every repeat; play through its end once.
     source.loop = false;
-    source.connect(game.master);
+    const bass = game.context.createBiquadFilter();
+    bass.type = "lowshelf";
+    bass.frequency.value = 180;
+    bass.gain.value = 4;
+    const body = game.context.createBiquadFilter();
+    body.type = "peaking";
+    body.frequency.value = 420;
+    body.Q.value = .7;
+    body.gain.value = 1.5;
+    const headroom = game.context.createGain();
+    headroom.gain.value = .65;
+    source.connect(bass);
+    bass.connect(body);
+    body.connect(headroom);
+    headroom.connect(game.master);
     game.voices.add(source);
     source.onended = () => {
       source.disconnect();
+      bass.disconnect();
+      body.disconnect();
+      headroom.disconnect();
       game.voices.delete(source);
     };
     source.start(game.musicStart, 0);
@@ -222,17 +239,14 @@
       const laneCounts = [0, 0];
       if (game.passed) game.level = Math.min(MAX_LEVEL, game.level + 1);
       game.passed = false;
-      let beats = 0, offbeats = 0;
-      const runChart = chart.filter((n) => n.time < DURATION - 0.17 &&
-        (n.kind === "beat" ? game.level > 1 || beats++ % 3 !== 2 :
-          game.level >= 4 || (game.level === 3 && offbeats++ % 2 === 0)));
+      const runChart = window.JokerDifficulty.chart(scoreData, game.level, DURATION);
       lastLaneTime.fill(-Infinity);
       MIN_LANE_INTERVAL = runChart.reduce((minimum, note) => {
         const interval = note.time - lastLaneTime[note.lane];
         lastLaneTime[note.lane] = note.time;
         return Math.min(minimum, interval);
       }, Infinity);
-      $("level-info").textContent = `LEVEL ${game.level} · ${runChart.length}枚 · 及第点 ${Math.ceil(runChart.length * 60)}点`;
+      $("level-info").textContent = `LEVEL ${game.level} · ${runChart.length}枚 · Good ±${Math.round(judgementWindow() * 1000)}ms · 及第点 ${Math.ceil(runChart.length * 60)}点`;
       game.notes = runChart.map((n) => ({
         ...n,
         suit: (n.lane === 0 ? ["♠", "♣"] : ["♥", "♦"])[laneCounts[n.lane]++ % 2],
@@ -298,7 +312,7 @@
     if (note) judge(note, Math.abs(note.at - now) <= judgementWindow() / 2 + 0.0000001 ? "perfect" : "good", now);
   }
   function judgementWindow() {
-    return Math.max(0.09, 0.16 - Math.max(0, game.level - 4) * 0.005);
+    return window.JokerDifficulty.judgementWindow(game.level);
   }
   function frame() {
     if (game.state !== "playing") return;
