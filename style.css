@@ -229,7 +229,7 @@ h1 span {
   font-size: 0.65em;
 }
 .game-title .title-sin {
-  color: #f2bd68;
+  color: inherit;
   font-size: 1.18em;
   font-weight: 700;
   text-shadow:
