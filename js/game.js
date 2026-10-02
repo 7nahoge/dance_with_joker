@@ -353,7 +353,7 @@
     if (complete) {
       dialogue("全10レベルクリア！最高の舞踏会をありがとう。おめでとう！");
       $("result-status").textContent = "LEVEL 10 · ALL CLEAR！";
-      window.JokerCelebration.start();
+      window.JokerCelebration.start(game.context, game.master);
     }
     $("result-score").textContent = game.score;
     $("result-combo").textContent = game.maxCombo;

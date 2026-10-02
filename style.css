@@ -56,6 +56,21 @@
 .hat::after { content: ""; position: absolute; width: 62px; height: 7px; bottom: -12px; left: -10px; border-radius: 50%; background: #514351; }
 .ticket { padding: 9px 6px; border: 2px dashed #665547; background: var(--color); color: #493b36; font: 8px Georgia; letter-spacing: 1px; }
 .star { font-size: 45px; }
+.circus-piece.card {
+  width: 43px; height: 62px; padding: 5px;
+  border: 1px solid #c8b684; border-radius: 5px;
+  background: #fff4df; color: var(--suit-color);
+  font: bold 15px Georgia, serif; white-space: pre;
+}
+.circus-piece.card::after { content: "♔"; position: absolute; top: 24px; left: 12px; font-size: 23px; }
+.carousel { width: 70px; height: 78px; border-bottom: 8px solid var(--color); border-radius: 8px; }
+.carousel::before {
+  content: ""; position: absolute; top: 0; left: 0; width: 70px; height: 29px;
+  clip-path: polygon(50% 0, 100% 90%, 100% 100%, 0 100%, 0 90%);
+  background: repeating-conic-gradient(from -35deg at 50% 0, #e3c38c 0deg 20deg, #a85569 20deg 40deg);
+}
+.carousel::after { content: ""; position: absolute; left: 33px; top: 27px; width: 3px; height: 44px; background: #e3c38c; }
+.carousel-horse { position: absolute; z-index: 1; top: 29px; left: 14px; color: #f6e6c3; font-size: 43px; line-height: 1; }
 .ball { width: 32px; height: 32px; border-radius: 50%; background: radial-gradient(circle at 30% 25%, #ffffff88, transparent 40%), conic-gradient(var(--color) 0deg 90deg, #caba9b 90deg 180deg, var(--color) 180deg 270deg, #856474 270deg); }
 @keyframes circus-fall {
   from { transform: translate3d(0, -100px, 0) rotate(-20deg); }

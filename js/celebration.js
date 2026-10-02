@@ -6,6 +6,60 @@
   const rain = document.getElementById("circus-rain");
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   const colors = ["#c49b94", "#abb4a0", "#c8b684", "#a7a1b5", "#9bb4b7"];
+  let audioSources = [], audioCache = null;
+  // Original calliope waltz and a crowd of independently timed claps.
+  // Buffers share the game's master gain, including its volume/mute controls.
+  function celebrationAudio(context, master) {
+    if (!context || !master) return;
+    if (!audioCache || audioCache.context !== context) {
+      const rate = 22050, beat = 60 / 156, duration = 48 * beat;
+      const music = context.createBuffer(2, Math.round(duration * rate), rate);
+      function note(midi, at, length, gain, pan = 0) {
+        const frequency = 440 * 2 ** ((midi - 69) / 12);
+        for (let i = 0; i < Math.floor(length * rate); i++) {
+          const t = i / rate, index = Math.round(at * rate) + i;
+          if (index >= music.length) break;
+          const envelope = Math.min(t / .012, 1) * Math.min((length - t) / .055, 1);
+          const phase = 2 * Math.PI * frequency * t;
+          const value = (Math.sin(phase) + .3 * Math.sin(phase * 2) + .12 * Math.sin(phase * 3)) * envelope * gain;
+          music.getChannelData(0)[index] += value * (1 - pan * .4);
+          music.getChannelData(1)[index] += value * (1 + pan * .4);
+        }
+      }
+      const melody = [76,79,84,83,81,79,77,81,86,84,83,81,79,83,86,88,86,83,84,79,76,74,76,79,
+        76,79,84,88,86,84,81,84,89,88,86,84,83,86,89,88,86,83,84,79,76,79,83,84];
+      const chords = [[48,60,64,67],[53,60,65,69],[55,62,67,71],[48,60,64,67]];
+      for (let b = 0; b < 48; b++) {
+        const chord = chords[Math.floor(b / 6) % 4];
+        note(melody[b], b * beat, beat * .82, .24, .25);
+        if (b % 3 === 0) note(chord[0], b * beat, beat * .85, .23, -.2);
+        else chord.slice(1).forEach(m => note(m, b * beat, beat * .5, .065, -.3));
+      }
+      const applause = context.createBuffer(2, rate * 14, rate);
+      for (let person = 0; person < 36; person++) {
+        const pan = Math.random(), interval = .24 + Math.random() * .25;
+        for (let at = Math.random() * .6; at < 13.6; at += interval + Math.random() * .07) {
+          const strength = .09 * Math.min(at / .7, 1) * Math.min((14 - at) / 3, 1);
+          let previous = 0;
+          for (let i = 0; i < rate * .075; i++) {
+            const index = Math.round(at * rate) + i;
+            const noise = Math.random() * 2 - 1;
+            const value = (noise - previous * .6) * Math.exp(-i / (rate * .014)) * strength;
+            previous = noise;
+            applause.getChannelData(0)[index] += value * Math.sqrt(1 - pan);
+            applause.getChannelData(1)[index] += value * Math.sqrt(pan);
+          }
+        }
+      }
+      audioCache = { context, music, applause };
+    }
+    for (const [buffer, loop] of [[audioCache.music, true], [audioCache.applause, false]]) {
+      const source = context.createBufferSource();
+      source.buffer = buffer; source.loop = loop; source.connect(master);
+      source.onended = () => { source.disconnect(); audioSources = audioSources.filter(s => s !== source); };
+      audioSources.push(source); source.start();
+    }
+  }
   let raf = 0, particles = [], rockets = [], width = 0, height = 0, last = 0, next = 0;
   function resize() {
     width = innerWidth; height = innerHeight;
@@ -52,19 +106,33 @@
     raf = requestAnimationFrame(frame);
   }
   function stop() {
+    for (const source of audioSources) { source.stop(); source.disconnect(); }
+    audioSources = [];
     cancelAnimationFrame(raf); raf = 0; panel.hidden = true;
     particles = []; rockets = []; rain.replaceChildren();
     window.removeEventListener("resize", resize);
   }
-  function start() {
+  function start(context, master) {
     stop(); panel.hidden = false; resize();
+    celebrationAudio(context, master);
     window.addEventListener("resize", resize);
     ctx.clearRect(0,0,width,height);
-    for (let i = 0; i < 32; i++) {
+    for (let i = 0; i < 42; i++) {
       const el = document.createElement("span");
-      const kind = ["balloon", "balloon", "hat", "ticket", "star", "ball"][i % 6];
+      const kinds = ["balloon", "card", "hat", "ticket", "star", "ball", "carousel"];
+      const kind = kinds[i % kinds.length];
       el.className = `circus-piece ${kind}`;
       el.textContent = { hat: "♠", ticket: "ADMIT ONE", star: "✦", ball: "" }[kind] || "";
+      el.setAttribute("aria-hidden", "true");
+      if (kind === "card") {
+        const suits = ["♥", "♠", "♦", "♣"], suit = suits[Math.floor(i / kinds.length) % 4];
+        el.textContent = `A${suit}`;
+        el.style.setProperty("--suit-color", suit === "♥" || suit === "♦" ? "#a32940" : "#302736");
+      }
+      if (kind === "carousel") {
+        const horse = document.createElement("span");
+        horse.className = "carousel-horse"; horse.textContent = "♞"; el.append(horse);
+      }
       el.style.setProperty("--color", colors[i % colors.length]);
       el.style.setProperty("--x", `${Math.random() * 100}%`);
       el.style.setProperty("--drift", `${Math.random() * 140 - 70}px`);
