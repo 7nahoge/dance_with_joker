@@ -849,17 +849,17 @@ dialog .eyebrow {
     height: 58px;
   }
   .pads span {
-    font-size: 19px;
+    font-size: 23px;
   }
   .play-hint {
     font-size: 8px;
     margin: 7px 0;
   }
   .card {
-    width: 30px;
-    height: 42px;
-    margin-left: -15px;
-    font-size: 18px;
+    width: 36px;
+    height: 50px;
+    margin-left: -18px;
+    font-size: 23px;
   }
   .count {
     font-size: 28px;
