@@ -317,7 +317,7 @@ async function verify(root = require("node:path").resolve(__dirname, "..")) {
     assert(get("level-info").textContent.includes(`LEVEL ${level} `));
     const levelStart = audio.currentTime + lead;
     const levelChart = window.JokerDifficulty.chart(scoreData, level);
-    assert.equal(levelChart.length, [19,22,25,28,28,28,28,28,28,28][level - 1]);
+    assert.equal(levelChart.length, [19,22,25,28,28,28,30,30,30,30][level - 1]);
     const laneTimes = [-Infinity, -Infinity];
     let closeRun = 1;
     const bursts = new Set();

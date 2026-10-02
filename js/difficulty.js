@@ -15,7 +15,11 @@
         }
         const group = phrase * (beats / 6) + pulse / 6;
         let slots;
-        if (extras >= 1 && group % 4 === 1) {
+        if (level >= 7 && group % 4 === 0) {
+          slots = [0, 1, 2, 4, 6, 7, 8, 9];
+        } else if (level >= 7 && group % 4 === 3) {
+          slots = [0, 1, 3, 4, 6, 8, 9, 10];
+        } else if (extras >= 1 && group % 4 === 1) {
           slots = [0, 1, 2, 6, 9];
           if (extras >= 2) slots.push(7);
           if (extras >= 3) slots.push(10);
