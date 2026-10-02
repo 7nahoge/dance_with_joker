@@ -791,7 +791,7 @@ dialog .eyebrow {
     padding-top: 8px;
   }
   body.in-game .character {
-    height: calc(100svh - 70px - env(safe-area-inset-bottom));
+    height: calc(100svh - 198px - env(safe-area-inset-bottom));
     min-height: 260px;
   }
   body.in-game .right {
@@ -848,6 +848,37 @@ dialog .eyebrow {
   }
   .pads button {
     height: 58px;
+  }
+  body.in-game .theatre {
+    padding-bottom: calc(128px + env(safe-area-inset-bottom));
+  }
+  body.in-game .pads {
+    position: fixed;
+    z-index: 4;
+    inset: auto 0 0;
+    gap: 16px;
+    padding: 12px max(5%, env(safe-area-inset-right))
+      calc(12px + env(safe-area-inset-bottom)) max(5%, env(safe-area-inset-left));
+    background: #231b22;
+    border-top: 1px solid #bca17066;
+    box-shadow: 0 -6px 22px #0004;
+  }
+  body.in-game .pads button {
+    height: 92px;
+    border-radius: 10px;
+    touch-action: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+  body.in-game .pads b {
+    font-size: 28px;
+  }
+  body.in-game .pads small {
+    font-size: 10px;
+    margin-top: 6px;
+  }
+  body.in-game .field {
+    height: calc(100svh - 276px - env(safe-area-inset-bottom));
   }
   .pads span {
     font-size: 23px;
