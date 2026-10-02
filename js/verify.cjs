@@ -124,6 +124,11 @@ async function verify(root = require("node:path").resolve(__dirname, "..")) {
     }
   }
   const window = new Element();
+  let celebrating = false;
+  window.JokerCelebration = {
+    start() { celebrating = true; },
+    stop() { celebrating = false; },
+  };
   window.AudioContext = Audio;
   window.location = { protocol: "http:" };
   const context = vm.createContext({
@@ -419,6 +424,34 @@ async function verify(root = require("node:path").resolve(__dirname, "..")) {
   await get("quit").fire("click");
   assert.equal(active.size, 0);
   assert.equal(raf, null);
+  // Complete every level, then ensure the finale cannot advance to level 11.
+  await get("start").fire("click");
+  for (let level = 1; level <= 10; level++) {
+    assert(get("level-info").textContent.includes(`LEVEL ${level} `));
+    const levelStart = audio.currentTime + lead;
+    let beats = 0, offbeats = 0;
+    const levelChart = scoreData.notes.filter(n => n.time / playbackRate < playDuration - 0.17 &&
+      (n.kind === "beat" ? level > 1 || beats++ % 3 !== 2 :
+        level >= 4 || (level === 3 && offbeats++ % 2 === 0)));
+    for (const n of levelChart) {
+      tick(levelStart + n.time / playbackRate);
+      await press(n.lane);
+    }
+    tick(levelStart + playDuration + 0.01);
+    assert.equal(celebrating, level === 10);
+    if (level < 10) await get("retry").fire("click");
+  }
+  assert.equal(get("retry").hidden, true);
+  assert(get("result-status").textContent.includes("ALL CLEAR"));
+  await get("retry").fire("click");
+  assert.equal(celebrating, true);
+  assert(get("level-info").textContent.includes("LEVEL 10 "));
+  await get("finale-back").fire("click");
+  assert.equal(celebrating, false);
+  assert.equal(get("retry").hidden, false);
+  await get("start").fire("click");
+  assert(get("level-info").textContent.includes("LEVEL 1 "));
+  await get("quit").fire("click");
   return `PASS: ${runChart.length} beat/offbeat notes, ${scoreData.bpm * playbackRate} BPM, no overlap; WAV loading/cache/scheduling; failure recovery; pause/resume; retry; full run; judgement boundaries; duplicate input; held key; hidden tab; cleanup; missing images/video; ${runChart.length * 100}-point perfect run.`;
 }
 module.exports = verify;

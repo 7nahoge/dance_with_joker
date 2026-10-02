@@ -8,6 +8,7 @@
     $("start").disabled = true;
     return;
   }
+  const MAX_LEVEL = 10;
   const PLAYBACK_RATE = 160 / scoreData.bpm;
   const BEAT = scoreData.beat / PLAYBACK_RATE,
     COUNT_IN = 6 * BEAT,
@@ -166,6 +167,7 @@
     source.stop(game.endTime);
   }
   function clearRun() {
+    window.JokerCelebration.stop();
     game.generation++;
     cancelAnimationFrame(game.raf);
     game.raf = 0;
@@ -187,7 +189,7 @@
     $("combo").textContent = game.combo;
   }
   async function start() {
-    if (game.busy) return;
+    if (game.busy || (game.passed && game.level === MAX_LEVEL)) return;
     game.busy = true;
     $("start").disabled = $("retry").disabled = true;
     try {
@@ -214,7 +216,7 @@
       game.musicStart = game.countStart + COUNT_IN;
       game.endTime = game.musicStart + DURATION;
       const laneCounts = [0, 0];
-      if (game.passed) game.level++;
+      if (game.passed) game.level = Math.min(MAX_LEVEL, game.level + 1);
       game.passed = false;
       let beats = 0, offbeats = 0;
       const runChart = chart.filter((n) => n.time < DURATION - 0.17 &&
@@ -346,6 +348,13 @@
     dialogue(game.passed ? "合格、やるじゃんすけ。次は、もう少し難しいステップを。" : "もう一度、同じステップで踊ってみる？");
     $("result-status").textContent = `LEVEL ${game.level} · ${game.passed ? "合格！" : "再挑戦"} · 及第点 ${Math.ceil(game.notes.length * 60)}点`;
     $("retry").textContent = game.passed ? `レベル ${game.level + 1} へ進む →` : `レベル ${game.level} に再挑戦 ↻`;
+    const complete = game.passed && game.level === MAX_LEVEL;
+    $("retry").hidden = complete;
+    if (complete) {
+      dialogue("全10レベルクリア！最高の舞踏会をありがとう。おめでとう！");
+      $("result-status").textContent = "LEVEL 10 · ALL CLEAR！";
+      window.JokerCelebration.start();
+    }
     $("result-score").textContent = game.score;
     $("result-combo").textContent = game.maxCombo;
     for (const k of ["perfect", "good", "miss"]) $("result-" + k).textContent = game[k];
@@ -381,6 +390,7 @@
     }
   }
   function title() {
+    $("retry").hidden = false;
     game.level = 1;
     game.passed = false;
     clearRun();
@@ -393,6 +403,7 @@
   }
   $("start").addEventListener("click", start);
   $("retry").addEventListener("click", start);
+  $("finale-back").addEventListener("click", title);
   $("back").addEventListener("click", title);
   $("quit").addEventListener("click", title);
   $("pause").addEventListener("click", pause);

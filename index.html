@@ -4,11 +4,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
     <title>danSiNg with the joker ～ジョーカーと秘密のワルツ～</title>
-    <link rel="stylesheet" href="style.css?v=levels1" />
+    <link rel="stylesheet" href="style.css?v=finale10" />
     <link rel="icon" href="./favicon.ico?v=1" type="image/x-icon" />
     <link rel="shortcut icon" href="./favicon.ico?v=1" type="image/x-icon" />
     <script src="js/music-chart.js?v=waltz24-rest226" defer></script>
-    <script src="js/game.js?v=levels1" defer></script>
+    <script src="js/celebration.js?v=finale10" defer></script>
+    <script src="js/game.js?v=finale10" defer></script>
   </head>
   <body>
     <div class="theatre">
@@ -104,11 +105,22 @@
         <span>♦ THE JOKER TAKES THE STAGE ♦</span><span id="asset-status" role="status"></span>
       </footer>
     </div>
+    <section id="celebration" class="celebration" hidden aria-label="全10レベルクリアのお祝い">
+      <canvas id="fireworks" aria-hidden="true"></canvas>
+      <div id="circus-rain" aria-hidden="true"></div>
+      <div class="finale-content">
+        <p class="eyebrow">THE GRAND FINALE · LEVEL 10</p>
+        <h2>全レベルクリア、おめでとう！</h2>
+        <img src="assets/joker_card.png" alt="全レベルクリアを祝うジョーカーカード" class="finale-card" />
+        <p>あなたに、最高のカーテンコールを。</p>
+        <button id="finale-back" class="primary">タイトルへ戻る</button>
+      </div>
+    </section>
     <dialog id="help-dialog">
       <p class="eyebrow">HOW TO DANCE</p>
       <h2>ルールは、いたって簡単。</h2>
       <p>
-        6拍のカウントのあと、約64秒のワルツを1回だけ再生します。カードの中心が金色の線に重なったら入力。満点の60％以上で合格し、結果画面から次のレベルへ進めます。届かなければ同じレベルに再挑戦。レベル1〜4はカードと裏拍が増え、レベル5以降は判定が少しずつ厳しくなります。タイトルへ戻るとレベル1から始まります。
+        6拍のカウントのあと、約64秒のワルツを1回だけ再生します。カードの中心が金色の線に重なったら入力。満点の60％以上で合格し、結果画面から次のレベルへ進めます。届かなければ同じレベルに再挑戦。レベル1〜4はカードと裏拍が増え、レベル5以降は判定が少しずつ厳しくなります。レベル10が最終ステージです。クリアすると特別なお祝いが始まります。タイトルへ戻るとレベル1から始まります。
       </p>
       <div class="help-keys">
         <b>F <small>左レーン</small></b
