@@ -150,7 +150,7 @@ async function verify(root = require("node:path").resolve(__dirname, "..")) {
   vm.runInContext(fs.readFileSync(root + "/js/music-chart.js", "utf8"), context);
   const scoreData = window.WALTZ_SCORE,
     chart = scoreData.notes,
-    playbackRate = 160 / scoreData.bpm,
+    playbackRate = 1,
     lead = 0.12 + 6 * (scoreData.beat / playbackRate);
   const wav = fs.readFileSync(root + "/assets/joker_music.wav");
   assert.equal(wav.readUInt32LE(40) / wav.readUInt32LE(28), scoreData.duration);

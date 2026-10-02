@@ -9,7 +9,8 @@
     return;
   }
   const MAX_LEVEL = 10;
-  const PLAYBACK_RATE = 160 / scoreData.bpm;
+  // Preserve the track's original tempo and align the chart to its source beats.
+  const PLAYBACK_RATE = 1;
   const BEAT = scoreData.beat / PLAYBACK_RATE,
     COUNT_IN = 6 * BEAT,
     APPROACH = 2;
