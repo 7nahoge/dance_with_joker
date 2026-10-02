@@ -323,7 +323,7 @@ async function verify(root = require("node:path").resolve(__dirname, "..")) {
       assert(note.time - laneTimes[note.lane] > 2 * window.JokerDifficulty.judgementWindow(level), "Judgement windows must not overlap");
       laneTimes[note.lane] = note.time;
     }
-    assert(Math.abs(window.JokerDifficulty.judgementWindow(level) - (.12 - (level - 1) * .004)) < 1e-8);
+    assert(Math.abs(window.JokerDifficulty.judgementWindow(level) - (.18 - (level - 1) * .004)) < 1e-8);
     for (const n of levelChart) {
       tick(levelStart + n.time / playbackRate);
       await press(n.lane);
