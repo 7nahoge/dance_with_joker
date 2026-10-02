@@ -13,7 +13,6 @@
   const PLAYBACK_RATE = 1;
   const BEAT = scoreData.beat / PLAYBACK_RATE,
     COUNT_IN = 6 * BEAT,
-    MOVIE_DELAY = 6 * BEAT,
     APPROACH = 2;
   let DURATION = scoreData.duration / PLAYBACK_RATE;
   const MUSIC_URL = "assets/joker_music_s.wav?v=waltz24-file-as-is240";
@@ -306,7 +305,7 @@
     const now = game.context.currentTime,
       height = $("field").clientHeight,
       line = height * 0.82;
-    if (!game.movieStarted && now >= game.musicStart + MOVIE_DELAY) {
+    if (!game.movieStarted && now >= game.musicStart) {
       game.movieStarted = true;
       showPortrait(true);
     }

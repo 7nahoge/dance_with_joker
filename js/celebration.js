@@ -7,23 +7,36 @@
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   const colors = ["#c49b94", "#abb4a0", "#c8b684", "#a7a1b5", "#9bb4b7"];
   let audioSources = [], audioCache = null;
-  // Original calliope waltz and a crowd of independently timed claps.
+  // Layered orchestral waltz for the finale, with no applause track.
   // Buffers share the game's master gain, including its volume/mute controls.
   function celebrationAudio(context, master) {
     if (!context || !master) return;
     if (!audioCache || audioCache.context !== context) {
       const rate = 22050, beat = 60 / 156, duration = 48 * beat;
       const music = context.createBuffer(2, Math.round(duration * rate), rate);
-      function note(midi, at, length, gain, pan = 0) {
+      const left = music.getChannelData(0), right = music.getChannelData(1);
+      function note(midi, at, length, gain, pan = 0, voice = "brass") {
         const frequency = 440 * 2 ** ((midi - 69) / 12);
         for (let i = 0; i < Math.floor(length * rate); i++) {
-          const t = i / rate, index = Math.round(at * rate) + i;
-          if (index >= music.length) break;
-          const envelope = Math.min(t / .012, 1) * Math.min((length - t) / .055, 1);
-          const phase = 2 * Math.PI * frequency * t;
-          const value = (Math.sin(phase) + .3 * Math.sin(phase * 2) + .12 * Math.sin(phase * 3)) * envelope * gain;
-          music.getChannelData(0)[index] += value * (1 - pan * .4);
-          music.getChannelData(1)[index] += value * (1 + pan * .4);
+          const t = i / rate, index = (Math.round(at * rate) + i) % music.length;
+          const attack = voice === "strings" ? .09 : voice === "bell" ? .004 : .025;
+          const release = voice === "strings" ? .18 : .08;
+          const envelope = Math.min(t / attack, 1) * Math.min((length - t) / release, 1);
+          const phase = 2 * Math.PI * frequency * t + .012 * Math.sin(2 * Math.PI * 5 * t);
+          let tone;
+          if (voice === "strings") {
+            tone = .45 * Math.sin(phase) + .28 * Math.sin(phase * 1.003)
+              + .18 * Math.sin(phase * .997) + .16 * Math.sin(phase * 2) + .08 * Math.sin(phase * 3);
+          } else if (voice === "bell") {
+            tone = (Math.sin(phase) + .35 * Math.sin(phase * 2) * Math.exp(-t * 5)
+              + .15 * Math.sin(phase * 3) * Math.exp(-t * 8)) * Math.exp(-t * 3.5);
+          } else {
+            tone = Math.sin(phase) + .38 * Math.sin(phase * 2) + .18 * Math.sin(phase * 3)
+              + .07 * Math.sin(phase * 4);
+          }
+          const value = tone * envelope * gain;
+          left[index] += value * Math.sqrt((1 - pan) / 2);
+          right[index] += value * Math.sqrt((1 + pan) / 2);
         }
       }
       const melody = [76,79,84,83,81,79,77,81,86,84,83,81,79,83,86,88,86,83,84,79,76,74,76,79,
@@ -31,31 +44,45 @@
       const chords = [[48,60,64,67],[53,60,65,69],[55,62,67,71],[48,60,64,67]];
       for (let b = 0; b < 48; b++) {
         const chord = chords[Math.floor(b / 6) % 4];
-        note(melody[b], b * beat, beat * .82, .24, .25);
-        if (b % 3 === 0) note(chord[0], b * beat, beat * .85, .23, -.2);
-        else chord.slice(1).forEach(m => note(m, b * beat, beat * .5, .065, -.3));
-      }
-      const applause = context.createBuffer(2, rate * 14, rate);
-      for (let person = 0; person < 36; person++) {
-        const pan = Math.random(), interval = .24 + Math.random() * .25;
-        for (let at = Math.random() * .6; at < 13.6; at += interval + Math.random() * .07) {
-          const strength = .09 * Math.min(at / .7, 1) * Math.min((14 - at) / 3, 1);
-          let previous = 0;
-          for (let i = 0; i < rate * .075; i++) {
-            const index = Math.round(at * rate) + i;
-            const noise = Math.random() * 2 - 1;
-            const value = (noise - previous * .6) * Math.exp(-i / (rate * .014)) * strength;
-            previous = noise;
-            applause.getChannelData(0)[index] += value * Math.sqrt(1 - pan);
-            applause.getChannelData(1)[index] += value * Math.sqrt(pan);
-          }
+        const at = b * beat;
+        note(melody[b], at, beat * .9, .19, .15);
+        note(melody[b] - 12, at, beat * 1.1, .075, -.35, "strings");
+        if (b % 3 === 0) {
+          note(chord[0], at, beat * 1.35, .18, 0);
+          chord.slice(1).forEach((m, i) =>
+            note(m, at, beat * 3.3, .065, [-.65, .1, .65][i], "strings"));
+          note(melody[b] + 12, at, beat * 2, .075, .55, "bell");
+        } else chord.slice(1).forEach(m => note(m, at, beat * .65, .055, -.4));
+        // Harp-like eighth-note arpeggios add sparkle between the waltz beats.
+        for (let half = 0; half < 2; half++) {
+          const pitch = chord[1 + (b * 2 + half) % 3] + 12;
+          note(pitch, at + half * beat / 2, beat * 1.5, .045, half ? .7 : -.7, "bell");
         }
       }
-      audioCache = { context, music, applause };
+      // Circular stereo reflections retain the decay across loop boundaries.
+      const dryLeft = left.slice(), dryRight = right.slice();
+      for (const [seconds, gain] of [[.061, .16], [.113, .12], [.179, .09], [.293, .06]]) {
+        const delay = Math.round(seconds * rate);
+        for (let i = 0; i < music.length; i++) {
+          const from = (i - delay + music.length) % music.length;
+          left[i] += dryRight[from] * gain;
+          right[i] += dryLeft[from] * gain;
+        }
+      }
+      let peak = 0;
+      for (let i = 0; i < music.length; i++) peak = Math.max(peak, Math.abs(left[i]), Math.abs(right[i]));
+      const level = peak > .85 ? .85 / peak : 1;
+      for (let i = 0; i < music.length; i++) {
+        // Short fades prevent clicks at the loop seam.
+        const fade = Math.min(1, i / (rate * .005), (music.length - 1 - i) / (rate * .005));
+        left[i] *= level * fade;
+        right[i] *= level * fade;
+      }
+      audioCache = { context, music };
     }
-    for (const [buffer, loop] of [[audioCache.music, true], [audioCache.applause, false]]) {
+    for (const buffer of [audioCache.music]) {
       const source = context.createBufferSource();
-      source.buffer = buffer; source.loop = loop; source.connect(master);
+      source.buffer = buffer; source.loop = true; source.connect(master);
       source.onended = () => { source.disconnect(); audioSources = audioSources.filter(s => s !== source); };
       audioSources.push(source); source.start();
     }
