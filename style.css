@@ -232,7 +232,10 @@ h1 span {
   color: #f2bd68;
   font-size: 1.18em;
   font-weight: 700;
-  text-shadow: 0 0 12px rgba(242, 189, 104, 0.45);
+  text-shadow:
+    0 0 4px rgba(242, 189, 104, 0.3),
+    0 0 14px rgba(242, 189, 104, 0.38),
+    0 0 26px rgba(242, 189, 104, 0.16);
 }
 .intro {
   font-size: 13px;
