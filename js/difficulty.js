@@ -49,6 +49,6 @@
   }
   window.JokerDifficulty = {
     chart,
-    judgementWindow: level => Math.max(.144, .18 - (level - 1) * .004),
+    judgementWindow: level => Math.max(.124, .16 - (level - 1) * .004),
   };
 })();
