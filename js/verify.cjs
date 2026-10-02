@@ -219,12 +219,12 @@ async function verify(root = require("node:path").resolve(__dirname, "..")) {
   await press(0);
   await press(1);
   assert.equal(get("score").textContent, "0100");
-  tick(lead + runChart[1].time / playbackRate + 0.07);
+  tick(lead + runChart[1].time / playbackRate + 0.10);
   await press(1, true);
   assert.equal(get("score").textContent, "0100");
   await press(1);
   assert.equal(get("score").textContent, "0160");
-  tick(lead + runChart[2].time / playbackRate + 0.17);
+  tick(lead + runChart[2].time / playbackRate + 0.19);
   assert.equal(get("combo").textContent, 0);
   await get("pause").fire("click");
   const stoppedAt = audio.currentTime;
@@ -295,16 +295,16 @@ async function verify(root = require("node:path").resolve(__dirname, "..")) {
   await get("start").fire("click");
   // Inclusive timing boundaries and just-outside input rejection.
   const boundaryStart = audio.currentTime + lead;
-  tick(boundaryStart + runChart[0].time / playbackRate - 0.121);
+  tick(boundaryStart + runChart[0].time / playbackRate - 0.181);
   await press(0);
   assert.equal(get("score").textContent, "0000");
-  tick(boundaryStart + runChart[0].time / playbackRate - 0.12);
+  tick(boundaryStart + runChart[0].time / playbackRate - 0.18);
   await press(0);
   assert.equal(get("score").textContent, "0060");
-  tick(boundaryStart + runChart[1].time / playbackRate + 0.06);
+  tick(boundaryStart + runChart[1].time / playbackRate + 0.09);
   await press(runChart[1].lane);
   assert.equal(get("score").textContent, "0160");
-  tick(boundaryStart + runChart[2].time / playbackRate + 0.12);
+  tick(boundaryStart + runChart[2].time / playbackRate + 0.18);
   await press(runChart[2].lane);
   assert.equal(get("score").textContent, "0220");
   await get("pause").fire("click");
@@ -319,6 +319,13 @@ async function verify(root = require("node:path").resolve(__dirname, "..")) {
     const levelChart = window.JokerDifficulty.chart(scoreData, level);
     assert.equal(levelChart.length, [19,22,25,28,28,28,28,28,28,28][level - 1]);
     const laneTimes = [-Infinity, -Infinity];
+    let closeRun = 1;
+    for (let i = 1; i < levelChart.length; i++) {
+      const gap = levelChart[i].time - levelChart[i - 1].time;
+      assert(gap > 0, "Cards must remain in chronological order");
+      closeRun = gap <= scoreData.beat / 2 + 1e-8 ? closeRun + 1 : 1;
+      assert(closeRun <= 2, "Half-beat card runs must not exceed two cards");
+    }
     for (const note of levelChart) {
       assert(note.time - laneTimes[note.lane] > 2 * window.JokerDifficulty.judgementWindow(level), "Judgement windows must not overlap");
       laneTimes[note.lane] = note.time;
