@@ -19,13 +19,15 @@
   const chart = scoreData.notes.map((note) => ({ ...note, time: note.time / PLAYBACK_RATE }));
   // Keep consecutive cards in each lane separated, including on short screens.
   const lastLaneTime = [-Infinity, -Infinity];
-  const MIN_LANE_INTERVAL = chart.reduce((minimum, note) => {
+  let MIN_LANE_INTERVAL = chart.reduce((minimum, note) => {
     const interval = note.time - lastLaneTime[note.lane];
     lastLaneTime[note.lane] = note.time;
     return Math.min(minimum, interval);
   }, Infinity);
   const game = {
     state: "title",
+    level: 1,
+    passed: false,
     context: null,
     master: null,
     voices: new Set(),
@@ -212,7 +214,20 @@
       game.musicStart = game.countStart + COUNT_IN;
       game.endTime = game.musicStart + DURATION;
       const laneCounts = [0, 0];
-      game.notes = chart.map((n) => ({
+      if (game.passed) game.level++;
+      game.passed = false;
+      let beats = 0, offbeats = 0;
+      const runChart = chart.filter((n) => n.time < DURATION - 0.17 &&
+        (n.kind === "beat" ? game.level > 1 || beats++ % 3 !== 2 :
+          game.level >= 4 || (game.level === 3 && offbeats++ % 2 === 0)));
+      lastLaneTime.fill(-Infinity);
+      MIN_LANE_INTERVAL = runChart.reduce((minimum, note) => {
+        const interval = note.time - lastLaneTime[note.lane];
+        lastLaneTime[note.lane] = note.time;
+        return Math.min(minimum, interval);
+      }, Infinity);
+      $("level-info").textContent = `LEVEL ${game.level} · ${runChart.length}枚 · 及第点 ${Math.ceil(runChart.length * 60)}点`;
+      game.notes = runChart.map((n) => ({
         ...n,
         suit: (n.lane === 0 ? ["♠", "♣"] : ["♥", "♦"])[laneCounts[n.lane]++ % 2],
         at: game.musicStart + n.time,
@@ -237,7 +252,7 @@
       game.busy = false;
       $("start").disabled = $("retry").disabled = false;
       $("start").textContent = "舞踏会をはじめる →";
-      $("retry").textContent = "もう一度踊る ↻";
+      $("retry").textContent = game.passed ? `レベル ${game.level + 1} へ進む →` : `レベル ${game.level} に再挑戦 ↻`;
     }
   }
   function judge(note, kind, now) {
@@ -272,9 +287,12 @@
     if (game.state !== "playing" || game.context.state !== "running") return;
     const now = game.context.currentTime;
     const note = game.notes.find(
-      (n) => n.lane === lane && !n.judged && Math.abs(n.at - now) <= 0.1600001,
+      (n) => n.lane === lane && !n.judged && Math.abs(n.at - now) <= judgementWindow() + 0.0000001,
     );
-    if (note) judge(note, Math.abs(note.at - now) <= 0.0800001 ? "perfect" : "good", now);
+    if (note) judge(note, Math.abs(note.at - now) <= judgementWindow() / 2 + 0.0000001 ? "perfect" : "good", now);
+  }
+  function judgementWindow() {
+    return Math.max(0.09, 0.16 - Math.max(0, game.level - 4) * 0.005);
   }
   function frame() {
     if (game.state !== "playing") return;
@@ -292,7 +310,7 @@
       Math.max(0, Math.min(100, ((now - game.musicStart) / DURATION) * 100)) + "%";
     for (const note of game.notes) {
       if (note.judged) continue;
-      if (now - note.at > 0.1600001) {
+      if (now - note.at > judgementWindow() + 0.0000001) {
         judge(note, "miss", now);
         continue;
       }
@@ -307,7 +325,7 @@
           note.element = el;
         }
         const cardHeight = note.element.offsetHeight;
-        const approach = Math.min(APPROACH, ((line + 40) * MIN_LANE_INTERVAL) / (cardHeight + 10));
+        const approach = Math.min(APPROACH, ((line + 40) * MIN_LANE_INTERVAL) / (cardHeight + 24));
         note.element.style.transform = `translateY(${line - ((note.at - now) / approach) * (line + 40) - cardHeight / 2}px)`;
       }
     }
@@ -319,11 +337,15 @@
     game.raf = requestAnimationFrame(frame);
   }
   function finish() {
+    for (const note of game.notes) if (!note.judged) judge(note, "miss", game.context.currentTime);
+    game.passed = game.score >= Math.ceil(game.notes.length * 60);
     game.state = "result";
     clearRun();
     screen("result");
     showPortrait(false);
-    dialogue("もう一曲、挑んでみる？");
+    dialogue(game.passed ? "合格。次は、もう少し難しいステップを。" : "もう一度、同じステップで踊ってみる？");
+    $("result-status").textContent = `LEVEL ${game.level} · ${game.passed ? "合格！" : "再挑戦"} · 及第点 ${Math.ceil(game.notes.length * 60)}点`;
+    $("retry").textContent = game.passed ? `レベル ${game.level + 1} へ進む →` : `レベル ${game.level} に再挑戦 ↻`;
     $("result-score").textContent = game.score;
     $("result-combo").textContent = game.maxCombo;
     for (const k of ["perfect", "good", "miss"]) $("result-" + k).textContent = game[k];
@@ -359,6 +381,8 @@
     }
   }
   function title() {
+    game.level = 1;
+    game.passed = false;
     clearRun();
     game.state = "title";
     $("pause-dialog").close();

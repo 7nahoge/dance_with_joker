@@ -4,11 +4,11 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
     <title>danSiNg with the joker ～ジョーカーと秘密のワルツ～</title>
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="style.css?v=levels1" />
     <link rel="icon" href="./favicon.ico?v=1" type="image/x-icon" />
     <link rel="shortcut icon" href="./favicon.ico?v=1" type="image/x-icon" />
     <script src="js/music-chart.js?v=waltz24-rest226" defer></script>
-    <script src="js/game.js?v=waltz24-file-as-is240" defer></script>
+    <script src="js/game.js?v=levels1" defer></script>
   </head>
   <body>
     <div class="theatre">
@@ -56,9 +56,10 @@
             <p class="music-note">3/4 WALTZ <i>·</i> 160 BPM <i>·</i> 63.8 SECONDS</p>
             <button id="start" class="primary">舞踏会をはじめる <span>→</span></button
             ><button id="help" class="text-button">遊び方を見る</button>
-            <p class="invitation">全。裏拍まで、ついてこられる？</p>
+            <p class="invitation">合格するたび、新しいステップへ。</p>
           </div>
           <div id="play" class="play-panel" hidden>
+            <p id="level-info" class="play-hint"></p>
             <div class="scoreboard">
               <div>SCORE<strong id="score">0000</strong></div>
               <div>COMBO<strong id="combo">0</strong></div>
@@ -85,6 +86,7 @@
             <p class="eyebrow">THE CURTAIN FALLS</p>
             <div class="ornament">✦ ─── ◇ ─── ✦</div>
             <h2>今宵の舞踏会</h2>
+            <p id="result-status" class="result-label" aria-live="polite"></p>
             <p class="result-label">今宵の腕前</p>
             <strong id="result-score" class="result-score">0</strong>
             <div class="results">
@@ -106,7 +108,7 @@
       <p class="eyebrow">HOW TO DANCE</p>
       <h2>ルールは、いたって簡単。</h2>
       <p>
-        6拍のカウントのあと、約68秒のワルツが始まります。全。最初から裏拍のカードが登場し、後半は4枚ごとにひと休み入ります。「1と2と3と」の「と」も意識して、カードの中心が金色の線に重なったら入力。
+        6拍のカウントのあと、約64秒のワルツを1回だけ再生します。カードの中心が金色の線に重なったら入力。満点の60％以上で合格し、結果画面から次のレベルへ進めます。届かなければ同じレベルに再挑戦。レベル1〜4はカードと裏拍が増え、レベル5以降は判定が少しずつ厳しくなります。タイトルへ戻るとレベル1から始まります。
       </p>
       <div class="help-keys">
         <b>F <small>左レーン</small></b
@@ -114,7 +116,7 @@
       </div>
       <p>スマートフォンは下の左右ボタンをタップ。マウスのクリックでも踊れます。</p>
       <p>
-        Perfect ±80ms / 100点<br />Good ±160ms / 60点<br />Missでコンボが途切れますが、最後まで踊れます。
+        レベル1〜4：Perfect ±80ms / 100点<br />Good ±160ms / 60点<br />レベル5以降は判定幅が縮まります（最小Perfect ±45ms / Good ±90ms）。<br />Missでコンボが途切れますが、最後まで踊れます。
       </p>
       <p>一時停止ボタン・Escで中断。タブを離れると自動で停止します。</p>
       <button id="close-help" class="primary">タイトルへ戻る</button>

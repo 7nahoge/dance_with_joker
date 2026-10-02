@@ -292,6 +292,8 @@ async function verify(root = require("node:path").resolve(__dirname, "..")) {
   );
   const playDuration = scoreData.duration / playbackRate;
 
+  let beats = 0;
+  let runChart = chart.filter(n => n.kind === "beat" && beats++ % 3 !== 2);
   vm.runInContext(fs.readFileSync(root + "/js/game.js", "utf8"), context);
   const tick = (t) => {
     if (audio.state === "running") audio.currentTime = t;
@@ -326,18 +328,18 @@ async function verify(root = require("node:path").resolve(__dirname, "..")) {
   assert.equal(sources[0].startedAt, lead);
   assert.equal(sources[0].offset, 0);
   assert.equal(sources[0].stoppedAt, lead + playDuration);
-  tick(lead + chart[0].time / playbackRate);
+  tick(lead + runChart[0].time / playbackRate);
   await press(0);
   assert.equal(get("score").textContent, "0100");
   await press(0);
   await press(1);
   assert.equal(get("score").textContent, "0100");
-  tick(lead + chart[1].time / playbackRate + 0.1);
+  tick(lead + runChart[1].time / playbackRate + 0.1);
   await press(1, true);
   assert.equal(get("score").textContent, "0100");
   await press(1);
   assert.equal(get("score").textContent, "0160");
-  tick(lead + chart[2].time / playbackRate + 0.17);
+  tick(lead + runChart[2].time / playbackRate + 0.17);
   assert.equal(get("combo").textContent, 0);
   await get("pause").fire("click");
   const stoppedAt = audio.currentTime;
@@ -358,7 +360,7 @@ async function verify(root = require("node:path").resolve(__dirname, "..")) {
   assert.equal(get("result").hidden, false);
   assert.equal(get("result-perfect").textContent, 1);
   assert.equal(get("result-good").textContent, 1);
-  assert.equal(get("result-miss").textContent, chart.length - 2);
+  assert.equal(get("result-miss").textContent, runChart.length - 2);
   assert.equal(active.size, 0);
   await get("retry").fire("click");
   assert.equal(active.size, voices);
@@ -378,37 +380,46 @@ async function verify(root = require("node:path").resolve(__dirname, "..")) {
   assert.equal(get("placeholder").hidden, false);
   await get("start").fire("click");
   const start = audio.currentTime + lead;
-  for (const n of chart) {
+  for (const n of runChart) {
     tick(start + n.time / playbackRate);
     await pads[n.lane].fire("pointerdown", { button: 0, pointerId: 1 });
     await pads[n.lane].fire("click", { detail: 1 });
     await press(n.lane, true);
   }
   tick(start + playDuration + 0.01);
-  assert.equal(get("result-score").textContent, chart.length * 100);
-  assert.equal(get("result-combo").textContent, chart.length);
-  assert.equal(get("result-perfect").textContent, chart.length);
+  assert.equal(get("result-score").textContent, runChart.length * 100);
+  assert.equal(get("result-combo").textContent, runChart.length);
+  assert.equal(get("result-perfect").textContent, runChart.length);
   assert.equal(get("result-miss").textContent, 0);
-  // Inclusive timing boundaries and just-outside input rejection.
+  assert(get("result-status").textContent.includes("合格"));
   await get("retry").fire("click");
+  assert(get("level-info").textContent.includes("LEVEL 2"));
+  tick(audio.currentTime + lead + playDuration + 0.01);
+  assert(get("result-status").textContent.includes("再挑戦"));
+  await get("retry").fire("click");
+  assert(get("level-info").textContent.includes("LEVEL 2"));
+  await get("pause").fire("click");
+  await get("quit").fire("click");
+  await get("start").fire("click");
+  // Inclusive timing boundaries and just-outside input rejection.
   const boundaryStart = audio.currentTime + lead;
-  tick(boundaryStart + chart[0].time / playbackRate - 0.161);
+  tick(boundaryStart + runChart[0].time / playbackRate - 0.161);
   await press(0);
   assert.equal(get("score").textContent, "0000");
-  tick(boundaryStart + chart[0].time / playbackRate - 0.16);
+  tick(boundaryStart + runChart[0].time / playbackRate - 0.16);
   await press(0);
   assert.equal(get("score").textContent, "0060");
-  tick(boundaryStart + chart[1].time / playbackRate + 0.08);
+  tick(boundaryStart + runChart[1].time / playbackRate + 0.08);
   await press(1);
   assert.equal(get("score").textContent, "0160");
-  tick(boundaryStart + chart[2].time / playbackRate + 0.16);
-  await press(0);
+  tick(boundaryStart + runChart[2].time / playbackRate + 0.16);
+  await press(runChart[2].lane);
   assert.equal(get("score").textContent, "0220");
   await get("pause").fire("click");
   await get("quit").fire("click");
   assert.equal(active.size, 0);
   assert.equal(raf, null);
-  return `PASS: ${chart.length} beat/offbeat notes, ${scoreData.bpm * playbackRate} BPM, no overlap; WAV loading/cache/scheduling; failure recovery; pause/resume; retry; full run; judgement boundaries; duplicate input; held key; hidden tab; cleanup; missing images/video; ${chart.length * 100}-point perfect run.`;
+  return `PASS: ${runChart.length} beat/offbeat notes, ${scoreData.bpm * playbackRate} BPM, no overlap; WAV loading/cache/scheduling; failure recovery; pause/resume; retry; full run; judgement boundaries; duplicate input; held key; hidden tab; cleanup; missing images/video; ${runChart.length * 100}-point perfect run.`;
 }
 module.exports = verify;
 if (require.main === module)

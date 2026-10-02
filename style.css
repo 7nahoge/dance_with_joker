@@ -231,11 +231,11 @@ h1 span {
 .game-title .title-sin {
   color: inherit;
   font-size: 1.18em;
-  font-weight: 700;
+  font-weight: 400;
   text-shadow:
-    0 0 4px rgba(242, 189, 104, 0.3),
-    0 0 14px rgba(242, 189, 104, 0.38),
-    0 0 26px rgba(242, 189, 104, 0.16);
+    0 0 4px rgba(242, 189, 104, 0.45),
+    0 0 14px rgba(242, 189, 104, 0.55),
+    0 0 26px rgba(242, 189, 104, 0.28);
 }
 .intro {
   font-size: 13px;
@@ -375,8 +375,8 @@ footer {
 }
 .card {
   position: absolute;
-  width: 44px;
-  height: 60px;
+  width: 38px;
+  height: 52px;
   border-radius: 5px;
   background: #eee4ce;
   color: #582330;
@@ -385,10 +385,10 @@ footer {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 26px;
+  font-size: 23px;
   will-change: transform;
   top: 0;
-  margin-left: -22px;
+  margin-left: -19px;
 }
 .card:before,
 .card:after {
@@ -749,10 +749,10 @@ dialog .eyebrow {
     margin: 7px 0;
   }
   .card {
-    width: 36px;
-    height: 48px;
-    margin-left: -18px;
-    font-size: 21px;
+    width: 30px;
+    height: 42px;
+    margin-left: -15px;
+    font-size: 18px;
   }
   .count {
     font-size: 28px;
