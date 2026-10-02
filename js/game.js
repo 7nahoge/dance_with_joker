@@ -13,7 +13,7 @@
     COUNT_IN = 6 * BEAT,
     APPROACH = 2;
   let DURATION = scoreData.duration / PLAYBACK_RATE;
-  const MUSIC_URL = "assets/joker_music.wav?v=waltz24-file-as-is240";
+  const MUSIC_URL = "assets/joker_music_s.wav?v=waltz24-file-as-is240";
   let musicBuffer = null;
   // Beat and offbeat timings follow complete 3/4 bars across each repeat.
   const chart = scoreData.notes.map((note) => ({ ...note, time: note.time / PLAYBACK_RATE }));
@@ -134,12 +134,12 @@
         "音楽の読み込みにはローカルHTTPサーバーが必要です。READMEの起動方法をご確認ください。",
       );
     const response = await fetch(MUSIC_URL);
-    if (!response.ok) throw new Error("assets/joker_music.wav を読み込めませんでした。");
+    if (!response.ok) throw new Error("assets/joker_music_s.wav を読み込めませんでした。");
     try {
       musicBuffer = await game.context.decodeAudioData(await response.arrayBuffer());
     } catch {
       throw new Error(
-        "音楽をデコードできませんでした。assets/joker_music.wav が正しく配信されているか確認してください。",
+        "音楽をデコードできませんでした。assets/joker_music_s.wav が正しく配信されているか確認してください。",
       );
     }
     if (!(musicBuffer.duration > 0)) {

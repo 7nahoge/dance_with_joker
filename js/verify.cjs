@@ -130,7 +130,7 @@ async function verify(root = require("node:path").resolve(__dirname, "..")) {
     document,
     window,
     fetch: async (url) => {
-      assert.equal(url, "assets/joker_music.wav?v=waltz24-file-as-is240");
+      assert.equal(url, "assets/joker_music_s.wav?v=waltz24-file-as-is240");
       fetchCount++;
       return { ok: !failFetch, arrayBuffer: async () => new ArrayBuffer(8) };
     },
