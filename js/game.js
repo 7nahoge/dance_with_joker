@@ -276,7 +276,7 @@
     if (kind === "miss") {
       game.combo = 0;
       if (now - game.lastMiss >= 4) {
-        dialogue("おっと。次は見せてくれる？");
+        dialogue("おっと。次は見せてくれな？");
         game.lastMiss = now;
       }
     } else {
@@ -360,14 +360,14 @@
     clearRun();
     screen("result");
     showPortrait(false);
-    dialogue(game.passed ? "合格、やるじゃんすけ。次は、もう少し難しいステップを。" : "もう一度、同じステップで踊ってみる？");
+    dialogue(game.passed ? "やるじゃんすけ。次は、もう少し難しいステップよ。" : "もう一度、同じステップで踊りたまへ。");
     $("result-status").textContent = `LEVEL ${game.level} · ${game.passed ? "合格！" : "再挑戦"} · 及第点 ${Math.ceil(game.notes.length * 60)}点`;
     $("retry").textContent = game.passed ? `レベル ${game.level + 1} へ進む →` : `レベル ${game.level} に再挑戦 ↻`;
     const complete = game.passed && game.level === MAX_LEVEL;
     $("retry").hidden = complete;
     if (complete) {
-      dialogue("全10レベルクリア！最高の舞踏会をありがとう。おめでとう！");
-      $("result-status").textContent = "LEVEL 10 · ALL CLEAR！";
+      dialogue("全10レベルクリア～あまりにおめでとう🤡");
+     $("result-status").textContent = "LEVEL 10 · ALL CLEAR！";
       window.JokerCelebration.start(game.context, game.master);
     }
     $("result-score").textContent = game.score;
