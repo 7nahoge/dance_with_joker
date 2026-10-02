@@ -4,11 +4,11 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
     <title>danSiNg with the joker ～ジョーカーと秘密のワルツ～</title>
-    <link rel="stylesheet" href="style.css?v=larger-card-suits" />
+    <link rel="stylesheet" href="style.css?v=mobile-result-actions" />
     <link rel="icon" href="./favicon.ico?v=1" type="image/x-icon" />
     <link rel="shortcut icon" href="./favicon.ico?v=1" type="image/x-icon" />
     <script src="js/music-chart.js?v=short-waltz" defer></script>
-    <script src="js/difficulty.js?v=spread-cards" defer></script>
+    <script src="js/difficulty.js?v=occasional-bursts" defer></script>
     <script src="js/celebration.js?v=orchestra-bass-confetti" defer></script>
     <script src="js/game.js?v=short-waltz" defer></script>
   </head>
@@ -97,8 +97,10 @@
               <div>Good<strong id="result-good"></strong></div>
               <div>Miss<strong id="result-miss"></strong></div>
             </div>
-            <button id="retry" class="primary">もう一度踊る <span>↻</span></button
-            ><button id="back" class="text-button">タイトルへ</button>
+            <div class="result-actions">
+              <button id="retry" class="primary">もう一度踊る <span>↻</span></button
+              ><button id="back" class="text-button">タイトルへ</button>
+            </div>
           </div>
         </section>
       </main>

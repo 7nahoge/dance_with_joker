@@ -320,12 +320,15 @@ async function verify(root = require("node:path").resolve(__dirname, "..")) {
     assert.equal(levelChart.length, [19,22,25,28,28,28,28,28,28,28][level - 1]);
     const laneTimes = [-Infinity, -Infinity];
     let closeRun = 1;
+    const bursts = new Set();
     for (let i = 1; i < levelChart.length; i++) {
       const gap = levelChart[i].time - levelChart[i - 1].time;
       assert(gap > 0, "Cards must remain in chronological order");
       closeRun = gap <= scoreData.beat / 2 + 1e-8 ? closeRun + 1 : 1;
-      assert(closeRun <= 2, "Half-beat card runs must not exceed two cards");
+      bursts.add(closeRun);
+      assert(closeRun <= 4, "Half-beat card runs must not exceed four cards");
     }
+    assert(bursts.has(3) && bursts.has(4), "Each level must include occasional three- and four-card bursts");
     for (const note of levelChart) {
       assert(note.time - laneTimes[note.lane] > 2 * window.JokerDifficulty.judgementWindow(level), "Judgement windows must not overlap");
       laneTimes[note.lane] = note.time;
