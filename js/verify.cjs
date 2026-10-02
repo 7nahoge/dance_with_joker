@@ -35,6 +35,7 @@ async function verify(root = require("node:path").resolve(__dirname, "..")) {
     focus() {}
     setPointerCapture() {}
     play() {
+      this.playCount = (this.playCount || 0) + 1;
       return Promise.resolve();
     }
     pause() {}
@@ -333,6 +334,11 @@ async function verify(root = require("node:path").resolve(__dirname, "..")) {
   assert.equal(sources[0].startedAt, lead);
   assert.equal(sources[0].offset, 0);
   assert.equal(sources[0].stoppedAt, lead + playDuration);
+  assert.equal(get("movie").hidden, true);
+  assert.equal(get("movie").currentTime, 0);
+  await get("pause").fire("click");
+  await get("resume").fire("click");
+  assert.equal(get("movie").hidden, true, "Resume must respect the movie delay");
   tick(lead + runChart[0].time / playbackRate);
   await press(0);
   assert.equal(get("score").textContent, "0100");
@@ -356,6 +362,14 @@ async function verify(root = require("node:path").resolve(__dirname, "..")) {
   assert.equal(audio.currentTime, stoppedAt);
   assert.equal(active.size, voices);
   assert.equal(sources.length, 1);
+  tick(lead + 6 * scoreData.beat - 0.001);
+  assert.equal(get("movie").hidden, true);
+  tick(lead + 6 * scoreData.beat);
+  assert.equal(get("movie").hidden, false);
+  assert.equal(get("movie").playCount, 1);
+  await get("pause").fire("click");
+  await get("resume").fire("click");
+  assert.equal(get("movie").playCount, 2);
   tick(lead + playDuration - 1);
   assert.equal(get("play").hidden, false);
   assert.equal(get("result").hidden, true);
@@ -371,6 +385,8 @@ async function verify(root = require("node:path").resolve(__dirname, "..")) {
   assert.equal(active.size, voices);
   assert.equal(get("score").textContent, "0000");
   assert.equal(sources.length, 2);
+  assert.equal(get("movie").hidden, true);
+  assert.equal(get("movie").currentTime, 0);
   assert.equal(sources[1].offset, 0);
   assert.equal(fetchCount, 3);
   document.hidden = true;

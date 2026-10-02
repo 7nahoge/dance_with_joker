@@ -31,7 +31,7 @@
 - js/music-chart.js：音源の拍と各フレーズの開始時刻に同期した譜面。元音源上の繰り返し境界は9.6・19.2・28.8・38.4・48・57.6秒です。
 - js/analyze-melody.cjs：再生成時の旋律解析。解析結果は参考情報として保持しますが、現在のカード配置は表拍と裏拍を使用します。
 - js/game.js：WAV読み込み、再生予約、判定、描画。AudioContext.currentTimeを音楽・判定・終了時刻に共用します。中断はsuspend/resumeで音楽ごと停止し、再開時の同期を保ちます。
-- index.html / style.css：画面構成と表示。画像・動画が読めないときも仮表示で続行できます。動画はミュート再生です。
+- index.html / style.css：画面構成と表示。画像・動画が読めないときも仮表示で続行できます。動画はミュート再生で、音楽の開始から6拍後（2.4秒後）に先頭から動き始めます。一時停止・再開は音楽と連動します。
 
 参考音源の生成：`node js/build-music.cjs`（joker_music.generated.wav と music-chart.generated.js に出力し、使用中の音源・譜面を上書きしません）
 

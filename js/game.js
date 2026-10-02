@@ -13,6 +13,7 @@
   const PLAYBACK_RATE = 1;
   const BEAT = scoreData.beat / PLAYBACK_RATE,
     COUNT_IN = 6 * BEAT,
+    MOVIE_DELAY = 6 * BEAT,
     APPROACH = 2;
   let DURATION = scoreData.duration / PLAYBACK_RATE;
   const MUSIC_URL = "assets/joker_music_s.wav?v=waltz24-file-as-is240";
@@ -43,6 +44,7 @@
     good: 0,
     miss: 0,
     musicStart: 0,
+    movieStarted: false,
     countStart: 0,
     endTime: 0,
     lastMiss: -Infinity,
@@ -184,6 +186,8 @@
     document.querySelectorAll(".pressed").forEach((n) => n.classList.remove("pressed"));
     document.body.classList.remove("flourish");
     $("movie").pause();
+    $("movie").currentTime = 0;
+    game.movieStarted = false;
   }
   function stats() {
     $("score").textContent = String(game.score).padStart(4, "0");
@@ -241,7 +245,7 @@
       game.state = "playing";
       screen("play");
       dialogue("さあ、私についてこられる？");
-      showPortrait(true);
+      showPortrait(game.movieStarted);
       frame();
       if (document.hidden) pause();
     } catch (error) {
@@ -302,6 +306,10 @@
     const now = game.context.currentTime,
       height = $("field").clientHeight,
       line = height * 0.82;
+    if (!game.movieStarted && now >= game.musicStart + MOVIE_DELAY) {
+      game.movieStarted = true;
+      showPortrait(true);
+    }
     document.querySelectorAll(".spark").forEach((el) => {
       if (now > Number(el.dataset.expires)) el.remove();
     });
@@ -381,7 +389,7 @@
       if (game.generation !== generation) return;
       $("pause-dialog").close();
       game.state = "playing";
-      showPortrait(true);
+      showPortrait(game.movieStarted);
       frame();
       if (document.hidden) pause();
     } catch {
