@@ -10,7 +10,7 @@
     <script src="js/music-chart.js?v=short-waltz" defer></script>
     <script src="js/difficulty.js?v=tighter-mixed-bursts" defer></script>
     <script src="js/celebration.js?v=orchestra-bass-confetti" defer></script>
-    <script src="js/game.js?v=short-waltz" defer></script>
+    <script src="js/game.js?v=empty-penalty" defer></script>
   </head>
   <body>
     <div class="theatre">
@@ -96,6 +96,7 @@
               <div>Perfect<strong id="result-perfect"></strong></div>
               <div>Good<strong id="result-good"></strong></div>
               <div>Miss<strong id="result-miss"></strong></div>
+              <div>空打ち<strong id="result-empty"></strong></div>
             </div>
             <div class="result-actions">
               <button id="retry" class="primary">もう一度踊る <span>↻</span></button
@@ -134,6 +135,7 @@
       <p>
         レベル1：Perfect ±50ms / 100点<br />Good ±100ms / 60点<br />各レベルでGoodの判定幅が4msずつ縮まり、Perfectはその半分です（レベル10：Perfect ±32ms / Good ±64ms）。<br />Missでコンボが途切れますが、最後まで踊れます。
       </p>
+      <p>カードの判定範囲外で押すと「空打ち」で60点減点され、コンボが途切れます（得点は0点まで）。カウント中と最後のカードの判定終了後は減点しません。</p>
       <p>一時停止ボタン・Escで中断。タブを離れると自動で停止します。</p>
       <button id="close-help" class="primary">タイトルへ戻る</button>
     </dialog>

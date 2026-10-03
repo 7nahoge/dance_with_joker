@@ -35,6 +35,7 @@
     perfect: 0,
     good: 0,
     miss: 0,
+    empty: 0,
     musicStart: 0,
     movieStarted: false,
     countStart: 0,
@@ -221,7 +222,7 @@
       volume();
       $("start").textContent = $("retry").textContent = "音楽を読み込み中…";
       await loadMusic();
-      for (const key of ["score", "combo", "maxCombo", "perfect", "good", "miss"]) game[key] = 0;
+      for (const key of ["score", "combo", "maxCombo", "perfect", "good", "miss", "empty"]) game[key] = 0;
       game.lastMiss = -Infinity;
       game.feedbackUntil = 0;
       $("judgement").textContent = "";
@@ -299,10 +300,21 @@
   function input(lane) {
     if (game.state !== "playing" || game.context.state !== "running") return;
     const now = game.context.currentTime;
+    const lastNote = game.notes[game.notes.length - 1];
+    if (now < game.musicStart || !lastNote || now - lastNote.at > judgementWindow() + 0.0000001) return;
     const note = game.notes.find(
       (n) => n.lane === lane && !n.judged && Math.abs(n.at - now) <= judgementWindow() + 0.0000001,
     );
     if (note) judge(note, Math.abs(note.at - now) <= judgementWindow() / 2 + 0.0000001 ? "perfect" : "good", now);
+    else {
+      game.empty++;
+      game.score = Math.max(0, game.score - 60);
+      game.combo = 0;
+      document.body.classList.remove("flourish");
+      $("judgement").textContent = "空打ち −60";
+      game.feedbackUntil = now + 0.55;
+      stats();
+    }
   }
   function judgementWindow() {
     return window.JokerDifficulty.judgementWindow(game.level);
@@ -372,7 +384,7 @@
     }
     $("result-score").textContent = game.score;
     $("result-combo").textContent = game.maxCombo;
-    for (const k of ["perfect", "good", "miss"]) $("result-" + k).textContent = game[k];
+    for (const k of ["perfect", "good", "miss", "empty"]) $("result-" + k).textContent = game[k];
   }
   function pause() {
     if (game.state !== "playing") return;
