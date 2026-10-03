@@ -208,6 +208,8 @@ async function verify(root = require("node:path").resolve(__dirname, "..")) {
   await get("resume").fire("click");
   assert.equal(get("movie").hidden, true, "Resume during the count-in must keep the movie paused");
   tick(lead - 0.001);
+  await press(0);
+  assert.equal(get("judgement").textContent, "", "Count-in inputs must not count as empty hits");
   assert.equal(get("movie").hidden, true);
   assert.equal(get("movie").playCount, 0);
   tick(lead);
@@ -217,13 +219,16 @@ async function verify(root = require("node:path").resolve(__dirname, "..")) {
   await press(0);
   assert.equal(get("score").textContent, "0100");
   await press(0);
+  assert.equal(get("score").textContent, "0040");
+  assert.equal(get("combo").textContent, 0);
+  assert.equal(get("judgement").textContent, "空打ち −60");
   await press(1);
-  assert.equal(get("score").textContent, "0100");
+  assert.equal(get("score").textContent, "0000");
   tick(lead + runChart[1].time / playbackRate + 0.10);
   await press(1, true);
-  assert.equal(get("score").textContent, "0100");
+  assert.equal(get("score").textContent, "0000");
   await press(1);
-  assert.equal(get("score").textContent, "0160");
+  assert.equal(get("score").textContent, "0060");
   tick(lead + runChart[2].time / playbackRate + 0.19);
   assert.equal(get("combo").textContent, 0);
   await get("pause").fire("click");
@@ -231,7 +236,7 @@ async function verify(root = require("node:path").resolve(__dirname, "..")) {
   tick(25);
   assert.equal(audio.currentTime, stoppedAt);
   await press(1);
-  assert.equal(get("score").textContent, "0160");
+  assert.equal(get("score").textContent, "0060");
   await get("resume").fire("click");
   assert.equal(audio.currentTime, stoppedAt);
   assert.equal(active.size, voices);
@@ -251,6 +256,7 @@ async function verify(root = require("node:path").resolve(__dirname, "..")) {
   assert.equal(get("result-perfect").textContent, 1);
   assert.equal(get("result-good").textContent, 1);
   assert.equal(get("result-miss").textContent, runChart.length - 2);
+  assert.equal(get("result-empty").textContent, 2);
   assert.equal(active.size, 0);
   await get("retry").fire("click");
   assert.equal(active.size, voices);
@@ -278,11 +284,16 @@ async function verify(root = require("node:path").resolve(__dirname, "..")) {
     await pads[n.lane].fire("click", { detail: 1 });
     await press(n.lane, true);
   }
+  tick(start + runChart.at(-1).time + 0.101);
+  await press(0);
+  await pads[1].fire("pointerdown", { button: 0, pointerId: 1 });
+  assert.equal(get("score").textContent, String(runChart.length * 100).padStart(4, "0"));
   tick(start + playDuration + 0.01);
   assert.equal(get("result-score").textContent, runChart.length * 100);
   assert.equal(get("result-combo").textContent, runChart.length);
   assert.equal(get("result-perfect").textContent, runChart.length);
   assert.equal(get("result-miss").textContent, 0);
+  assert.equal(get("result-empty").textContent, 0, "Empty count must reset and ignore track tail inputs");
   assert(get("result-status").textContent.includes("合格"));
   await get("retry").fire("click");
   assert(get("level-info").textContent.includes("LEVEL 2"));
@@ -295,22 +306,42 @@ async function verify(root = require("node:path").resolve(__dirname, "..")) {
   await get("start").fire("click");
   // Inclusive timing boundaries and just-outside input rejection.
   const boundaryStart = audio.currentTime + lead;
-  tick(boundaryStart + runChart[0].time / playbackRate - 0.101);
-  await press(0);
-  assert.equal(get("score").textContent, "0000");
-  tick(boundaryStart + runChart[0].time / playbackRate - 0.1);
-  await press(0);
-  assert.equal(get("score").textContent, "0060");
-  tick(boundaryStart + runChart[1].time / playbackRate + 0.05);
+  tick(boundaryStart + runChart[1].time / playbackRate - 0.101);
   await press(runChart[1].lane);
-  assert.equal(get("score").textContent, "0160");
-  tick(boundaryStart + runChart[2].time / playbackRate + 0.1);
+  assert.equal(get("score").textContent, "0000");
+  tick(boundaryStart + runChart[1].time / playbackRate - 0.1);
+  await press(runChart[1].lane);
+  assert.equal(get("score").textContent, "0060");
+  tick(boundaryStart + runChart[2].time / playbackRate + 0.05);
   await press(runChart[2].lane);
+  assert.equal(get("score").textContent, "0160");
+  tick(boundaryStart + runChart[3].time / playbackRate + 0.1);
+  await press(runChart[3].lane);
   assert.equal(get("score").textContent, "0220");
   await get("pause").fire("click");
   await get("quit").fire("click");
   assert.equal(active.size, 0);
   assert.equal(raf, null);
+  // Repeatedly pressing both lanes must not clear any level.
+  for (let level = 1; level <= 10; level++) {
+    const originalChart = window.JokerDifficulty.chart;
+    const originalWindow = window.JokerDifficulty.judgementWindow;
+    window.JokerDifficulty.chart = (score, ignoredLevel, duration) => originalChart(score, level, duration);
+    window.JokerDifficulty.judgementWindow = () => originalWindow(level);
+    await get("start").fire("click");
+    const spamStart = audio.currentTime + lead;
+    for (let step = 0; step * 0.02 < playDuration; step++) {
+      tick(spamStart + step * 0.02);
+      await pads[0].fire("pointerdown", { button: 0, pointerId: 1 });
+      await pads[1].fire("pointerdown", { button: 0, pointerId: 2 });
+    }
+    tick(spamStart + playDuration + 0.01);
+    assert(get("result-status").textContent.includes("再挑戦"), `Button spam must fail level ${level}`);
+    assert(get("result-empty").textContent > 0);
+    await get("back").fire("click");
+    window.JokerDifficulty.chart = originalChart;
+    window.JokerDifficulty.judgementWindow = originalWindow;
+  }
   // Complete every level, then ensure the finale cannot advance to level 11.
   await get("start").fire("click");
   for (let level = 1; level <= 10; level++) {
