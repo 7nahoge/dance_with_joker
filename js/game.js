@@ -252,7 +252,7 @@
       scheduleMusic();
       game.state = "playing";
       screen("play");
-      dialogue("さあ、私についてこられる？");
+      dialogue("さあ、わたしについてこられる？");
       showPortrait(game.movieStarted);
       frame();
       if (document.hidden) pause();
@@ -310,7 +310,7 @@
     if (note) judge(note, Math.abs(note.at - now) <= judgementWindow() / 2 + 0.0000001 ? "perfect" : "good", now);
     else {
       game.empty++;
-      game.score = Math.max(0, game.score - 30);
+      game.score = Math.max(0, game.score - 20);
       $("judgement").textContent = "空打";
       $("judgement").classList.add("empty-hit");
       game.feedbackUntil = now + 0.55;
@@ -373,7 +373,7 @@
     clearRun();
     screen("result");
     showPortrait(false);
-    dialogue(game.passed ? "やるじゃんすけ。次は、もう少し難しいステップよ。" : "もう一度、同じステップで踊りたまへ。");
+    dialogue(game.passed ? "やるじゃんすけ。次は、もう少し難しいステップよ。" : "ハイやり直し、もっと上手に踊りたまへ。");
     $("result-status").textContent = `LEVEL ${game.level} · ${game.passed ? "合格！" : "再挑戦"} · 及第点 ${Math.ceil(game.notes.length * 60)}点`;
     $("retry").textContent = game.passed ? `レベル ${game.level + 1} へ進む →` : `レベル ${game.level} に再挑戦 ↻`;
     const complete = game.passed && game.level === MAX_LEVEL;
