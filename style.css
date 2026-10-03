@@ -999,10 +999,10 @@ dialog .eyebrow {
     margin: 7px 0;
   }
   #cards > .card {
-    width: 44px;
-    height: 60px;
-    margin-left: -22px;
-    font-size: 34px;
+    width: 40px;
+    height: 54px;
+    margin-left: -20px;
+    font-size: 30px;
   }
   .count {
     font-size: 28px;
