@@ -310,7 +310,7 @@
     if (note) judge(note, Math.abs(note.at - now) <= judgementWindow() / 2 + 0.0000001 ? "perfect" : "good", now);
     else {
       game.empty++;
-      game.score = Math.max(0, game.score - 15);
+      game.score = Math.max(0, game.score - 10);
       $("judgement").textContent = "空打";
       $("judgement").classList.add("empty-hit");
       game.feedbackUntil = now + 0.55;
