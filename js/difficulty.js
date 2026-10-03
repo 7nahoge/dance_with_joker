@@ -15,7 +15,10 @@
         }
         const group = phrase * (beats / 6) + pulse / 6;
         let slots;
-        if (level >= 7 && group % 4 === 0) {
+        if (level >= 4 && level <= 6 && group % 4 === 1) {
+          // Occasionally mix a two-card run and a three-card run without adding cards.
+          slots = [0, 1, 3, 5, 6, 7, 9];
+        } else if (level >= 7 && group % 4 === 0) {
           slots = [0, 1, 2, 4, 6, 7, 8, 9];
         } else if (level >= 7 && group % 4 === 3) {
           slots = [0, 1, 3, 4, 6, 8, 9, 10];
@@ -49,6 +52,6 @@
   }
   window.JokerDifficulty = {
     chart,
-    judgementWindow: level => Math.max(.124, .16 - (level - 1) * .004),
+    judgementWindow: level => Math.max(.114, .15 - (level - 1) * .004),
   };
 })();
