@@ -308,10 +308,8 @@
     if (note) judge(note, Math.abs(note.at - now) <= judgementWindow() / 2 + 0.0000001 ? "perfect" : "good", now);
     else {
       game.empty++;
-      game.score = Math.max(0, game.score - 60);
-      game.combo = 0;
-      document.body.classList.remove("flourish");
-      $("judgement").textContent = "空打ち −60";
+      game.score = Math.max(0, game.score - 30);
+      $("judgement").textContent = "空打";
       game.feedbackUntil = now + 0.55;
       stats();
     }
