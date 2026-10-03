@@ -251,7 +251,7 @@ main {
   position: absolute;
 }
 .portrait img {
-  transform: scale(1.2);
+  transform: scale(1.4);
   transform-origin: center 65%;
   filter: drop-shadow(0 12px 25px #0008);
 }
