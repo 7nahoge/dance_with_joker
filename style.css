@@ -580,6 +580,10 @@ footer {
   color: #efce8b;
   pointer-events: none;
 }
+body.in-game #judgement.empty-hit {
+  font-size: 6px;
+  letter-spacing: 1px;
+}
 .spark {
   position: absolute;
   width: 72px;
@@ -920,10 +924,6 @@ dialog .eyebrow {
 @media (prefers-reduced-motion: reduce) {
   * {
     transition: none !important;
-  }
-  body.in-game #judgement.empty-hit {
-    font-size: 8px;
-    letter-spacing: 1px;
   }
   .spark {
     animation: none;
