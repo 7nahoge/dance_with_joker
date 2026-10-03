@@ -295,16 +295,16 @@ async function verify(root = require("node:path").resolve(__dirname, "..")) {
   await get("start").fire("click");
   // Inclusive timing boundaries and just-outside input rejection.
   const boundaryStart = audio.currentTime + lead;
-  tick(boundaryStart + runChart[0].time / playbackRate - 0.151);
+  tick(boundaryStart + runChart[0].time / playbackRate - 0.101);
   await press(0);
   assert.equal(get("score").textContent, "0000");
-  tick(boundaryStart + runChart[0].time / playbackRate - 0.15);
+  tick(boundaryStart + runChart[0].time / playbackRate - 0.1);
   await press(0);
   assert.equal(get("score").textContent, "0060");
-  tick(boundaryStart + runChart[1].time / playbackRate + 0.075);
+  tick(boundaryStart + runChart[1].time / playbackRate + 0.05);
   await press(runChart[1].lane);
   assert.equal(get("score").textContent, "0160");
-  tick(boundaryStart + runChart[2].time / playbackRate + 0.15);
+  tick(boundaryStart + runChart[2].time / playbackRate + 0.1);
   await press(runChart[2].lane);
   assert.equal(get("score").textContent, "0220");
   await get("pause").fire("click");
@@ -341,7 +341,7 @@ async function verify(root = require("node:path").resolve(__dirname, "..")) {
       assert(note.time - laneTimes[note.lane] > 2 * window.JokerDifficulty.judgementWindow(level), "Judgement windows must not overlap");
       laneTimes[note.lane] = note.time;
     }
-    assert(Math.abs(window.JokerDifficulty.judgementWindow(level) - (.15 - (level - 1) * .004)) < 1e-8);
+    assert(Math.abs(window.JokerDifficulty.judgementWindow(level) - (.1 - (level - 1) * .004)) < 1e-8);
     for (const n of levelChart) {
       tick(levelStart + n.time / playbackRate);
       await press(n.lane);
