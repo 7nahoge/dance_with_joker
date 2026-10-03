@@ -241,7 +241,7 @@
         lastLaneTime[note.lane] = note.time;
         return Math.min(minimum, interval);
       }, Infinity);
-      $("level-info").textContent = `LEVEL ${game.level} · ${runChart.length}枚 · Good ±${Math.round(judgementWindow() * 1000)}ms · 及第点 ${Math.ceil(runChart.length * 60)}点`;
+      $("level-info").textContent = `LEVEL ${game.level} · ${runChart.length}枚 · Good ±${Math.round(judgementWindow() * 1000)}ms · 及第点 ${Math.ceil(runChart.length * 50)}点`;
       game.notes = runChart.map((n) => ({
         ...n,
         suit: (n.lane === 0 ? ["♠", "♣"] : ["♥", "♦"])[laneCounts[n.lane]++ % 2],
@@ -368,13 +368,13 @@
   }
   function finish() {
     for (const note of game.notes) if (!note.judged) judge(note, "miss", game.context.currentTime);
-    game.passed = game.score >= Math.ceil(game.notes.length * 60);
+    game.passed = game.score >= Math.ceil(game.notes.length * 50);
     game.state = "result";
     clearRun();
     screen("result");
     showPortrait(false);
     dialogue(game.passed ? "やるじゃんすけ。次は、もう少し難しいステップよ。" : "ハイやり直し、もっと上手に踊りたまへ。");
-    $("result-status").textContent = `LEVEL ${game.level} · ${game.passed ? "合格！" : "再挑戦"} · 及第点 ${Math.ceil(game.notes.length * 60)}点`;
+    $("result-status").textContent = `LEVEL ${game.level} · ${game.passed ? "合格！" : "再挑戦"} · 及第点 ${Math.ceil(game.notes.length * 50)}点`;
     $("retry").textContent = game.passed ? `レベル ${game.level + 1} へ進む →` : `レベル ${game.level} に再挑戦 ↻`;
     const complete = game.passed && game.level === MAX_LEVEL;
     $("retry").hidden = complete;
