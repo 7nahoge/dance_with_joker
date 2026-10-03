@@ -226,6 +226,7 @@
       game.lastMiss = -Infinity;
       game.feedbackUntil = 0;
       $("judgement").textContent = "";
+      $("judgement").classList.remove("empty-hit");
       stats();
       game.countStart = game.context.currentTime + 0.12;
       game.musicStart = game.countStart + COUNT_IN;
@@ -293,6 +294,7 @@
       spark.addEventListener("animationend", () => spark.remove());
     }
     document.body.classList.toggle("flourish", game.combo >= 10);
+    $("judgement").classList.remove("empty-hit");
     $("judgement").textContent = kind[0].toUpperCase() + kind.slice(1);
     game.feedbackUntil = now + 0.55;
     stats();
@@ -310,6 +312,7 @@
       game.empty++;
       game.score = Math.max(0, game.score - 30);
       $("judgement").textContent = "空打";
+      $("judgement").classList.add("empty-hit");
       game.feedbackUntil = now + 0.55;
       stats();
     }

@@ -921,6 +921,10 @@ dialog .eyebrow {
   * {
     transition: none !important;
   }
+  body.in-game #judgement.empty-hit {
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
   .spark {
     animation: none;
     opacity: 0.35;
