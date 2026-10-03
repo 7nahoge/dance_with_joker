@@ -730,6 +730,10 @@ dialog .eyebrow {
   .portrait {
     inset: 0 0 20%;
   }
+  body:not(.in-game):not(.in-result) .character {
+    height: 44svh;
+    min-height: 260px;
+  }
   .arch {
     inset: 0 17% 18%;
   }
